@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .upload-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .upload-form h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        .upload-form input[type="file"] {
+            display: block;
+            margin-bottom: 20px;
+        }
+        .upload-form button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .upload-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-form">
+        <h2>Upload PDF File</h2>
+        <form id="pdf-upload-form">
+            <input type="file" id="pdf-file" name="pdfFile" accept="application/pdf" required>
+            <button type="submit">Upload</button>
+        </form>
+        <div id="response-message"></div>
+    </div>
+
+    <script>
+        document.getElementById('pdf-upload-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            var formData = new FormData();
+            var pdfFile = document.getElementById('pdf-file').files[0];
+            formData.append('pdf_file', pdfFile);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://127.0.0.1:8000/api/save-qa/', true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+            xhr.onload = function() {
+                var responseMessage = document.getElementById('response-message');
+                if (xhr.status === 201) {
+                    responseMessage.innerHTML = '<p style="color:green;">File uploaded successfully!</p>';
+                } else {
+                    responseMessage.innerHTML = '<p style="color:red;">Error: ' + xhr.responseText + '</p>';
+                }
+            };
+
+            xhr.send(formData);
+        });
+    </script>
+</body>
+</html>

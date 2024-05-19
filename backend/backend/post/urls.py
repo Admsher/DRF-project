@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('posts/', views.PostView.as_view(), name= 'posts_list'),
-    path('pdfupload/',views.PDFUploadView.as_view(),name='pdfupload')
+    path('save-qa/', views.QuestionAnswerAPIView.as_view()),
+    # path('posts/', views.QNAUploadView.as_view(), name= 'QNAUploadView'),
+    path('',views.home,name='home')
 ]

@@ -1,6 +1,11 @@
 from rest_framework import serializers
-from .models import Post
-from rest_framework import serializers
+from .models import QuestionAnswer,Post
+
+class QuestionAnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionAnswer
+        fields = ['id', 'question', 'answer']
+
 
 class PDFUploadSerializer(serializers.Serializer):
     pdf_file = serializers.FileField()
