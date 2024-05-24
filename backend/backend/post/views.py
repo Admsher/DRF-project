@@ -3,9 +3,10 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse
-from .models import QuestionAnswer
+from .models import QuestionAnswer,UploadedImage
 from .serializers import QuestionAnswerSerializer
-from .serializers import PostSerializer,PDFUploadSerializer
+from .serializers import PostSerializer,PDFUploadSerializer,ImageUploadSerializer
+from .facedetector import FaceRecognizer
 
 from .pdf import create_vector_database,ChatGroq,Chroma,groq_api_key,PromptTemplate,RetrievalQA
 
@@ -113,7 +114,7 @@ class QuestionAnswerAPIView(APIView):
         # QuestionAnswer.objects.all.delete()
         temp_str = response['result']
         lines = temp_str.split("\n")
-
+        print(len(lines))
         for line in lines:
             question_part=''
             answer_part=''
@@ -139,5 +140,21 @@ class QuestionAnswerAPIView(APIView):
         
         return Response(serializer.data,status=status.HTTP_200_OK)
 
+class FaceResultView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = ImageUploadSerializer(data=request.data)
+        if serializer.is_valid():
+            image1 = serializer.validated_data['image1']
+            image2 = serializer.validated_data['image2']
+            print("Success")
+            
+            fc=FaceRecognizer(image2)
+            fc.recognize_faces()
+            uploaded_image = UploadedImage(image=image1)
+            uploaded_image.save()
+
+          
+            return Response({"message": "Images received"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

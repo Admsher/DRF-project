@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import QuestionAnswer,Post
+from .models import QuestionAnswer,Post,UploadedImage
 
 class QuestionAnswerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,3 +19,13 @@ class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = '__all__'
+
+class ImageUploadSerializer(serializers.Serializer):
+    image1 = serializers.ImageField()
+    image2 = serializers.ImageField()
+
+
+class UploadedImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UploadedImage
+        fields = ['image', 'uploaded_at']
