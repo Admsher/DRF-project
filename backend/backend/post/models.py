@@ -19,5 +19,5 @@ class Post(models.Model):
 
 
 class UploadedImage(models.Model):
-    image = models.ImageField(upload_to='images/')
+    image = models.ImageField(upload_to='images/',blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)

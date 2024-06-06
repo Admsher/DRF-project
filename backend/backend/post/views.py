@@ -5,11 +5,11 @@ from rest_framework import status
 from django.http import HttpResponse
 from .models import QuestionAnswer,UploadedImage
 from .serializers import QuestionAnswerSerializer
-from .serializers import PostSerializer,PDFUploadSerializer,ImageUploadSerializer
-from .facedetector import FaceRecognizer
-
+from .serializers import PostSerializer,PDFUploadSerializer,ImageUploadSerializer,UploadedImageSerializer
+from .FaceIdentification import FaceRecognizer
+from django.shortcuts import render
 from .pdf import create_vector_database,ChatGroq,Chroma,groq_api_key,PromptTemplate,RetrievalQA
-
+from rest_framework import permissions
 
 
 
@@ -36,9 +36,12 @@ lines=''
 def home(request):
     return HttpResponse(lines)
 
+def imageupload(request):
+    return render(request,'imageupload.html',{})
 
 
 class QuestionAnswerAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     """
     API View to handle saving questions and answers data.
     """
@@ -141,20 +144,28 @@ class QuestionAnswerAPIView(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class FaceResultView(APIView):
+    def get(self, request, *args, **kwargs):
+        uploaded_images = UploadedImage.objects.all()
+        serializer = UploadedImageSerializer(uploaded_images, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
     def post(self, request, *args, **kwargs):
         serializer = ImageUploadSerializer(data=request.data)
         if serializer.is_valid():
             image1 = serializer.validated_data['image1']
             image2 = serializer.validated_data['image2']
-            print("Success")
             
-            fc=FaceRecognizer(image2)
-            fc.recognize_faces()
+            # known_image_path = os.path.join(settings.BASE_DIR, '/file/{images1}')
+
+            known_image_path = "/media/admsher/EXTERNAL/Gitrepo/DRF-project/backend/backend/post/known_person.jpg"
+            predictor_path = '/media/admsher/EXTERNAL/Gitrepo/DRF-project/backend/backend/post/shape_predictor_68_face_landmarks.dat'  
+
+            recognizer = FaceRecognizer(known_image_path, predictor_path)
+            recognizer.recognize_faces()
+            recognizer.release()
+            
             uploaded_image = UploadedImage(image=image1)
             uploaded_image.save()
 
-          
             return Response({"message": "Images received"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
