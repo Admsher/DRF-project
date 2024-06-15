@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import PdfPreview from './pdfpreview';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 function UploadDoc() {
   const [view, setView] = useState(false);
@@ -57,7 +56,7 @@ function UploadDoc() {
     setRecentFiles([currFileInfo, ...recentFiles]);
   };
 
-  const handleFileSubmit = async (e) => {
+  const handleFileSubmit = (e) => {
     e.preventDefault();
     if (!file) {
       alert("No file Selected");
@@ -67,25 +66,33 @@ function UploadDoc() {
     const formData = new FormData();
     formData.append('file', file);
 
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/assessor/save-qa/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      console.log('File uploaded successfully', response.data);
-      // handle success
-    } catch (error) {
-      console.error('Error uploading file', error);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `127.0.0.1:8000/assessor/save-qa/`, true);
+    xhr.setRequestHeader('enctype', 'multipart/form-data');
+
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        console.log('File uploaded successfully', xhr.responseText);
+        // handle success
+      } else {
+        console.error('Error uploading file', xhr.responseText);
+        // handle error
+      }
+    };
+
+    xhr.onerror = function () {
+      console.error('Error uploading file', xhr.responseText);
       // handle error
-    }
+    };
+
+    xhr.send(formData);
   };
 
   const handleUrl = (e) => {
     setUrl(e.target.value);
   };
 
-  const handleUrlSubmit = async (e) => {
+  const handleUrlSubmit = (e) => {
     e.preventDefault();
     console.log(url);
   };
@@ -219,3 +226,4 @@ function UploadDoc() {
 }
 
 export default UploadDoc;
+
