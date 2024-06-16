@@ -67,7 +67,34 @@ function UploadDoc() {
     formData.append('file', file);
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `127.0.0.1:8000/assessor/save-qa/`, true);
+    xhr.open('POST', `127.0.0.1:8000/assessor/save-qa/`, true);const handleFileSubmit = async (e) => {
+      e.preventDefault();
+      if (!file) {
+        alert("No file Selected");
+        return;
+      }
+    
+      const formData = new FormData();
+      formData.append('file', file);
+    
+      try {
+        const response = await fetch('http://127.0.0.1:8000/assessor/save-qa/', {
+          method: 'POST',
+          body: formData
+        });
+    
+        if (response.ok) {
+          console.log('File uploaded successfully');
+          // handle success
+        } else {
+          console.error('Error uploading file', response.statusText);
+          // handle error
+        }
+      } catch (error) {
+        console.error('Error uploading file', error);
+        // handle error
+      }
+    };
     xhr.setRequestHeader('enctype', 'multipart/form-data');
 
     xhr.onload = function () {
