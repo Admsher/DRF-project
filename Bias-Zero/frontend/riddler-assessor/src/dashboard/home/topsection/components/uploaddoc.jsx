@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PdfPreview from './pdfpreview';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function UploadDoc() {
   const [view, setView] = useState(false);
@@ -55,65 +56,38 @@ function UploadDoc() {
     setFileInfo(currFileInfo);
     setRecentFiles([currFileInfo, ...recentFiles]);
   };
-
-  const handleFileSubmit = (e) => {
-    e.preventDefault();
+const handleFileUpload = async () => {
     if (!file) {
-      alert("No file Selected");
+      setMessage('Please select a file first.');
       return;
     }
 
     const formData = new FormData();
     formData.append('file', file);
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', `127.0.0.1:8000/assessor/save-qa/`, true);const handleFileSubmit = async (e) => {
-      e.preventDefault();
-      if (!file) {
-        alert("No file Selected");
-        return;
-      }
-    
-      const formData = new FormData();
-      formData.append('file', file);
-    
-      try {
-        const response = await fetch('http://127.0.0.1:8000/assessor/save-qa/', {
-          method: 'POST',
-          body: formData
-        });
-    
-        if (response.ok) {
-          console.log('File uploaded successfully');
-          // handle success
-        } else {
-          console.error('Error uploading file', response.statusText);
-          // handle error
-        }
-      } catch (error) {
-        console.error('Error uploading file', error);
-        // handle error
-      }
-    };
-    xhr.setRequestHeader('enctype', 'multipart/form-data');
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/assessor/save-qa/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-    xhr.onload = function () {
-      if (xhr.status === 200) {
-        console.log('File uploaded successfully', xhr.responseText);
-        // handle success
+      setMessage('File uploaded successfully!');
+      console.log('File uploaded successfully:', response.data);
+    } catch (error) {
+      if (error.response) {
+        setMessage(`Error: ${error.response.data}`);
+        console.error('Response error:', error.response.data);
+      } else if (error.request) {
+        setMessage('Error: No response from the server.');
+        console.error('Request error:', error.request);
       } else {
-        console.error('Error uploading file', xhr.responseText);
-        // handle error
+        setMessage(`Error: ${error.message}`);
+        console.error('Error:', error.message);
       }
-    };
-
-    xhr.onerror = function () {
-      console.error('Error uploading file', xhr.responseText);
-      // handle error
-    };
-
-    xhr.send(formData);
+    }
   };
+
 
   const handleUrl = (e) => {
     setUrl(e.target.value);
@@ -125,7 +99,9 @@ function UploadDoc() {
   };
 
   return (
+
     <div className='bg-ltblue m-4 h-[90%] w-1/3 rounded-md flex flex-col'>
+    
       {/* Upload pop up */}
       {
         view &&
@@ -156,7 +132,7 @@ function UploadDoc() {
               <div>
                 {/* File Input */}
                 <div className='flex flex-col items-center p-5 text-white'>
-                  <form onSubmit={handleFileSubmit}>
+                  <form onSubmit={handleFileUpload}>
                     <input type="file" onChange={handleFile} />
                     <button type="submit" className='px-3 py-1 bg-white text-black rounded-md mt-2'>Submit</button>
                   </form>

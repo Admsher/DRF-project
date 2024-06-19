@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import QuestionAnswer, Post, UploadedImage
+from .models import QuestionAnswer, Post, UploadedImage,PDFFile
 
 class QuestionAnswerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -8,12 +8,9 @@ class QuestionAnswerSerializer(serializers.ModelSerializer):
 
 
 class PDFUploadSerializer(serializers.Serializer):
-    pdf_file = serializers.FileField()
-    # value=True
-    def validate_pdf_file(self, value):
-        if value.content_type != 'application/pdf':
-            raise serializers.ValidationError("Only PDF files are allowed.")
-        return value
+  class Meta:
+        model = PDFFile
+        fields = '__all__'
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
