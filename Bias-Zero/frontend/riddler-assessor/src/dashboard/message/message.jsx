@@ -12,30 +12,51 @@ function Message() {
   const [medium, setMedium] = useState([]);
   const [hard, setHard] = useState([]);
   const [veryhard, setVeryHard] = useState([]);
-
   const [totalQuestions, setTotalQuestions] = useState([]);
 
   useEffect(() => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', `127.0.0.1:8000/assessor/save-qa/`, true);
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === XMLHttpRequest.DONE) {
-        if (xhr.status === 200) {
-          const questions = JSON.parse(xhr.responseText);
-          setTotalQuestions(questions);
-
-          // Sort questions based on difficulty
-          setEasy(questions.filter(q => q.difficulty === 'easy'));
-          setMedium(questions.filter(q => q.difficulty === 'medium'));
-          setHard(questions.filter(q => q.difficulty === 'hard'));
-          setVeryHard(questions.filter(q => q.difficulty === 'very hard'));
-        } else {
-          console.error('There was an error fetching the questions!', xhr.statusText);
-        }
-      }
-    };
-    xhr.send();
+    fetchQuestions();
   }, []);
+
+  const fetchQuestions = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/assessor/save-qa/`, {
+        method: 'GET',
+        credentials: 'same-origin', // include cookies (including CSRF tokens) from the same origin
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'), // Include CSRF token from cookie
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const questions = await response.json();
+
+      // Categorize questions by difficulty
+      const easyQuestions = questions.filter(q => q.difficulty === 'easy');
+      const mediumQuestions = questions.filter(q => q.difficulty === 'medium');
+      const hardQuestions = questions.filter(q => q.difficulty === 'hard');
+      const veryHardQuestions = questions.filter(q => q.difficulty === 'very hard');
+
+      // Update state with categorized questions
+      setEasy(easyQuestions);
+      setMedium(mediumQuestions);
+      setHard(hardQuestions);
+      setVeryHard(veryHardQuestions);
+      setTotalQuestions(questions);
+    } catch (error) {
+      console.error('Error fetching questions:', error);
+      // Handle error state or logging as needed
+    }
+  };
+
+  const getCookie = (name) => {
+    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return cookieValue ? cookieValue.pop() : '';
+  };
 
   return (
     <div>
@@ -48,10 +69,16 @@ function Message() {
       </div>
       {/* Question selection */}
       <h2 className='font-bold ml-4 text-dkblue'>Select Questions</h2>
-      <Questions totalQuestions={totalQuestions} setTotalQuestions={setTotalQuestions} setEasy={setEasy} setMedium={setMedium} setHard={setHard} setVeryHard={setVeryHard} />
+      <Questions
+        totalQuestions={totalQuestions}
+        setTotalQuestions={setTotalQuestions}
+        setEasy={setEasy}
+        setMedium={setMedium}
+        setHard={setHard}
+        setVeryHard={setVeryHard}
+      />
     </div>
   );
 }
 
 export default Message;
-

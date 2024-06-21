@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import PdfPreview from './pdfpreview';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 function UploadDoc() {
   const [view, setView] = useState(false);
@@ -13,6 +12,7 @@ function UploadDoc() {
   const [fileType, setFileType] = useState("");
   const [fileInfo, setFileInfo] = useState({});
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
   const [recentFiles, setRecentFiles] = useState(() => {
@@ -32,7 +32,7 @@ function UploadDoc() {
     navigate('/message');
   };
 
-  const handleFile = async (e) => {
+  const handleFile = (e) => {
     const temp = e.target.files[0];
     if (temp.type === "application/pdf") {
       setFile(temp);
@@ -56,7 +56,9 @@ function UploadDoc() {
     setFileInfo(currFileInfo);
     setRecentFiles([currFileInfo, ...recentFiles]);
   };
-const handleFileUpload = async () => {
+
+  const handleFileUpload = async (e) => {
+    e.preventDefault();
     if (!file) {
       setMessage('Please select a file first.');
       return;
@@ -66,42 +68,68 @@ const handleFileUpload = async () => {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/assessor/save-qa/', formData, {
+      const csrfToken = getCookie('csrftoken'); // Fetch CSRF token from cookie
+      const response = await fetch('http://127.0.0.1:8000/assessor/save-qa/', {
+        method: 'POST',
+        body: formData,
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'X-CSRFToken': csrfToken, // Include CSRF token in headers
         },
       });
 
-      setMessage('File uploaded successfully!');
-      console.log('File uploaded successfully:', response.data);
-    } catch (error) {
-      if (error.response) {
-        setMessage(`Error: ${error.response.data}`);
-        console.error('Response error:', error.response.data);
-      } else if (error.request) {
-        setMessage('Error: No response from the server.');
-        console.error('Request error:', error.request);
-      } else {
-        setMessage(`Error: ${error.message}`);
-        console.error('Error:', error.message);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Something went wrong!');
       }
+
+      setMessage('File uploaded successfully!');
+      const responseData = await response.json();
+      console.log('File uploaded successfully:', responseData);
+    } catch (error) {
+      setMessage(`Error: ${error.message}`);
+      console.error('Error:', error.message);
     }
   };
-
 
   const handleUrl = (e) => {
     setUrl(e.target.value);
   };
 
-  const handleUrlSubmit = (e) => {
+  const handleUrlSubmit = async (e) => {
     e.preventDefault();
-    console.log(url);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch the file from the URL.');
+      }
+      const blob = await response.blob();
+      const tempFile = new File([blob], "downloadedFile", { type: blob.type });
+      setFile(tempFile);
+      setFileType(tempFile.type.includes('pdf') ? 'pdf' : 'docx');
+
+      const uploadDate = new Date();
+      const currFileInfo = {
+        name: tempFile.name,
+        type: tempFile.type,
+        size: (tempFile.size / 1024).toFixed(2), // size in KB
+        date: uploadDate.toLocaleDateString(),
+        time: uploadDate.toLocaleTimeString(),
+      };
+      setFileInfo(currFileInfo);
+      setRecentFiles([currFileInfo, ...recentFiles]);
+    } catch (error) {
+      setError(`Error: ${error.message}`);
+      console.error('Error:', error.message);
+    }
+  };
+
+  const getCookie = (name) => {
+    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return cookieValue ? cookieValue.pop() : '';
   };
 
   return (
-
     <div className='bg-ltblue m-4 h-[90%] w-1/3 rounded-md flex flex-col'>
-    
       {/* Upload pop up */}
       {
         view &&
@@ -229,4 +257,3 @@ const handleFileUpload = async () => {
 }
 
 export default UploadDoc;
-
