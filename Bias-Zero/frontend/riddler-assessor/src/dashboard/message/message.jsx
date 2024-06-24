@@ -20,7 +20,7 @@ function Message() {
 
   const fetchQuestions = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/assessor/save-qa/`, {
+      const response = await fetch(`127.0.0.1:8000/assessor/save-qa/`, {
         method: 'GET',
         credentials: 'same-origin', // include cookies (including CSRF tokens) from the same origin
         headers: {

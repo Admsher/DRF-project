@@ -3,15 +3,11 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse
-from .models import QuestionAnswer,UploadedImage
-from .serializers import QuestionAnswerSerializer
-from .serializers import PostSerializer,PDFUploadSerializer,ImageUploadSerializer,UploadedImageSerializer
+from .models import QuestionAnswer, UploadedImage
+from .serializers import QuestionAnswerSerializer, PDFUploadSerializer
 from models.pdfanalyser.pdf import create_vector_database, ChatGroq, Chroma, groq_api_key, PromptTemplate, RetrievalQA
 from django.shortcuts import render
 from rest_framework import permissions
-
-
-
 
 custom_prompt_template = """Use the following pieces of information to answer questions of the user.
 
@@ -30,18 +26,18 @@ def set_custom_prompt():
                             input_variables=['context', 'question'])
     return prompt
 
-lines=''
+lines = ''
 
 def home(request):
     return HttpResponse(lines)
 
 def imageupload(request):
-    return render(request,'imageupload.html',{})
-
+    return render(request, 'imageupload.html', {})
 
 class QuestionAnswerAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    
+    parser_classes = [MultiPartParser, FormParser]
+
     def get(self, request, *args, **kwargs):
         """
         List all the QuestionAnswer items.
@@ -49,33 +45,33 @@ class QuestionAnswerAPIView(APIView):
         qa = QuestionAnswer.objects.all()
         serializer = QuestionAnswerSerializer(qa, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     def post(self, request):
         serializer = PDFUploadSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
         pdf_file = serializer.validated_data['pdf_file']
-        
+
         try:
             # Save the uploaded PDF file
             with open(f'file/{pdf_file.name}', 'wb+') as destination:
                 for chunk in pdf_file.chunks():
                     destination.write(chunk)
-            
+
             # Perform ML model integration and retrieve questions and answers
             vs, embed_model = create_vector_database(fpath=f'file/{pdf_file.name}')
-            
+
             chat_model = ChatGroq(temperature=0.0,
                                   model_name="mixtral-8x7b-32768",
                                   api_key=groq_api_key)
-            
+
             vectorstore = Chroma(embedding_function=embed_model,
                                  persist_directory="chroma_db_llamaparse1",
                                  collection_name="rag")
-            
+
             retriever = vectorstore.as_retriever(search_kwargs={'k': 3})
-            
+
             custom_prompt_template = """
                 Use the following pieces of information to answer questions of the user.
                 Context: {context}
@@ -83,21 +79,21 @@ class QuestionAnswerAPIView(APIView):
                 Only return the helpful content below and nothing else.
                 Helpful answer:
                 """
-            
+
             prompt = PromptTemplate(input_variables=['context', 'question'], template=custom_prompt_template)
-            
+
             qa = RetrievalQA.from_chain_type(llm=chat_model,
                                             chain_type="stuff",
                                             retriever=retriever,
                                             return_source_documents=True,
                                             chain_type_kwargs={"prompt": prompt})
-            
+
             response = qa.invoke({
                 "query": "Generate 20 technical interview questions and answers suitable for a candidate with 0 year of experience "
                          "in the field, based on the provided content. Include a mix of basic, intermediate, tricky, and logical "
                          "questions. Follow a coherent order in the question formation. Provide the source documents."
             })
-            
+
             # Process the response and save questions and answers to database
             temp_str = response['result']
             lines = temp_str.split("\n")
@@ -108,18 +104,18 @@ class QuestionAnswerAPIView(APIView):
                     answer_part = line.split('Answer:')[1].strip()
                 elif 'Answer' not in line:
                     question_part = line.strip()
-                
+
                 # Save to the model if both question and answer are present
                 if question_part and answer_part:
                     qa_obj = QuestionAnswer(question=question_part, answer=answer_part)
                     qa_obj.save()
-            
+
             # Retrieve all QuestionAnswer objects and serialize the response
             qa_all = QuestionAnswer.objects.all()
             serializer = QuestionAnswerSerializer(qa_all, many=True)
-            
+
             return Response(serializer.data, status=status.HTTP_200_OK)
-        
+
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

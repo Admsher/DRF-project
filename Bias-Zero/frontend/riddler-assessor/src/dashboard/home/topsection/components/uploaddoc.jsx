@@ -57,40 +57,39 @@ function UploadDoc() {
     setRecentFiles([currFileInfo, ...recentFiles]);
   };
 
-  const handleFileUpload = async (e) => {
-    e.preventDefault();
-    if (!file) {
-      setMessage('Please select a file first.');
-      return;
+ const handleFileUpload = async (e) => {
+  e.preventDefault();
+  if (!file) {
+    setMessage('Please select a file first.');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const csrfToken = getCookie('csrftoken'); // Fetch CSRF token from cookie
+    const response = await fetch('http://127.0.0.1:8000/assessor/save-qa/', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': csrfToken, // Include CSRF token in headers
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Something went wrong!');
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const csrfToken = getCookie('csrftoken'); // Fetch CSRF token from cookie
-      const response = await fetch('http://127.0.0.1:8000/assessor/save-qa/', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'X-CSRFToken': csrfToken, // Include CSRF token in headers
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Something went wrong!');
-      }
-
-      setMessage('File uploaded successfully!');
-      const responseData = await response.json();
-      console.log('File uploaded successfully:', responseData);
-    } catch (error) {
-      setMessage(`Error: ${error.message}`);
-      console.error('Error:', error.message);
-    }
-  };
-
+    setMessage('File uploaded successfully!');
+    const responseData = await response.json();
+    console.log('File uploaded successfully:', responseData);
+  } catch (error) {
+    setMessage(`Error: ${error.message}`);
+    console.error('Error:', error);
+  }
+};
   const handleUrl = (e) => {
     setUrl(e.target.value);
   };
