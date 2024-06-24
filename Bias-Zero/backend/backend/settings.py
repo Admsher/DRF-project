@@ -137,3 +137,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Your frontend URL
     # "https://yourdomain.com",  # Additional allowed origin if necessary
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
+    ]
+}
