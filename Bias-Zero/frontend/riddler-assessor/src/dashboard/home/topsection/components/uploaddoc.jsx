@@ -67,15 +67,15 @@ const handleFileUpload = async (e) => {
   }
 
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('pdf_file', file); // Ensure the key matches the serializer field
 
   try {
-    const csrfToken = getCookie('csrftoken');
+    const csrfToken = getCookie('csrftoken'); // Fetch CSRF token from cookie
     const response = await fetch('http://127.0.0.1:8000/assessor/save-qa/', {
       method: 'POST',
       body: formData,
       headers: {
-        'X-CSRFToken': csrfToken,
+        'X-CSRFToken': csrfToken, // Include CSRF token in headers
       },
     });
 
@@ -92,9 +92,7 @@ const handleFileUpload = async (e) => {
     console.error('Error:', error);
   }
 };
-  const handleUrl = (e) => {
-    setUrl(e.target.value);
-  };
+
 
   const handleUrlSubmit = async (e) => {
     e.preventDefault();

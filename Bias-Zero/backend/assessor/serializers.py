@@ -7,6 +7,7 @@ class QuestionAnswerSerializer(serializers.ModelSerializer):
         fields = ['id', 'question', 'answer']
 
 
+
 class PDFUploadSerializer(serializers.Serializer):
     pdf_file = serializers.FileField()
 
@@ -14,6 +15,7 @@ class PDFUploadSerializer(serializers.Serializer):
         if value.content_type not in ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']:
             raise serializers.ValidationError('Upload pdf or docx format files only.')
         return value
+
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
