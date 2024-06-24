@@ -57,7 +57,9 @@ function UploadDoc() {
     setRecentFiles([currFileInfo, ...recentFiles]);
   };
 
- const handleFileUpload = async (e) => {
+ 
+
+const handleFileUpload = async (e) => {
   e.preventDefault();
   if (!file) {
     setMessage('Please select a file first.');
@@ -68,12 +70,12 @@ function UploadDoc() {
   formData.append('file', file);
 
   try {
-    const csrfToken = getCookie('csrftoken'); // Fetch CSRF token from cookie
+    const csrfToken = getCookie('csrftoken');
     const response = await fetch('http://127.0.0.1:8000/assessor/save-qa/', {
       method: 'POST',
       body: formData,
       headers: {
-        'X-CSRFToken': csrfToken, // Include CSRF token in headers
+        'X-CSRFToken': csrfToken,
       },
     });
 
@@ -161,8 +163,8 @@ function UploadDoc() {
                 <div className='flex flex-col items-center p-5 text-white'>
                   <form onSubmit={handleFileUpload}>
                     <input type="file" onChange={handleFile} />
-                    <button type="submit" className='px-3 py-1 bg-white text-black rounded-md mt-2'>Submit</button>
-                  </form>
+                        <button type="submit" className='px-3 py-1 bg-white text-black rounded-md mt-2'>Submit</button>
+                      </form>
                 </div>
                 {/* File Preview */}
                 <div className='h-[600px] m-1 flex flex-wrap'>
