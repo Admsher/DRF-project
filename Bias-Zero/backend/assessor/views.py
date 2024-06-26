@@ -129,6 +129,7 @@ class QuestionAnswerAPIView(APIView):
 
     def handle_file_upload(self, request):
         serializer = PDFUploadSerializer(data=request.data)
+        print(serializer.errors)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -244,6 +245,7 @@ class QuestionAnswerAPIView(APIView):
 
     def handle_url_upload(self, request):
         serializer = URLUploadSerializer(data=request.data)
+        print(serializer.errors)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
