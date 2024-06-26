@@ -133,6 +133,7 @@ class QuestionAnswerAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         pdf_file = serializer.validated_data['pdf_file']
+        print(serializer.errors)
         
         try:    
             qg_obj = qa_generator_pdf()
@@ -247,7 +248,7 @@ class QuestionAnswerAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         url = serializer.validated_data['url']
-
+        print(serializer.errors)
         try:
             # Process the URL with qa_generator_url and save to your model here
                     url="https://www.ibm.com/topics/machine-learning"
@@ -359,3 +360,4 @@ class QuestionAnswerAPIView(APIView):
 
 #             return Response({"message": "Images received"}, status=status.HTTP_201_CREATED)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('save-qa/', views.QuestionAnswerAPIView.as_view()),
+    path('save-qa/', views.PDFFileViewSet.as_view()),
     # path('posts/', views.QNAUploadView.as_view(), name= 'QNAUploadView'),
     # path('',views.home,name='home'),
     # path('imageupload',views.imageupload,name='imageupload'),
