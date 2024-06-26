@@ -29,3 +29,7 @@ class PDFFile(models.Model):
 
     def __str__(self):
         return self.file.name
+    
+    
+class URLQuestionAnswer(models.Model):
+    url = models.URLField()

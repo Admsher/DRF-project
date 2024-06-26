@@ -57,42 +57,40 @@ function UploadDoc() {
     setRecentFiles([currFileInfo, ...recentFiles]);
   };
 
- 
-
-const handleFileUpload = async (e) => {
-  e.preventDefault();
-  if (!file) {
-    setMessage('Please select a file first.');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('pdf_file', file); // Ensure the key matches the serializer field
-
-  try {
-    const csrfToken = getCookie('csrftoken'); // Fetch CSRF token from cookie
-    const response = await fetch('http://127.0.0.1:8000/assessor/save-qa/', {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'X-CSRFToken': csrfToken, // Include CSRF token in headers
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Something went wrong!');
+  const handleFileUpload = async (e) => {
+    e.preventDefault();
+    if (!file) {
+      setMessage('Please select a file first.');
+      return;
     }
 
-    setMessage('File uploaded successfully!');
-    const responseData = await response.json();
-    console.log('File uploaded successfully:', responseData);
-  } catch (error) {
-    setMessage(`Error: ${error.message}`);
-    console.error('Error:', error);
-  }
-};
+    const formData = new FormData();
+    formData.append('pdf_file', file); // Ensure the key matches the serializer field
+    formData.append('source', 'file'); // Add an identifier
 
+    try {
+      const csrfToken = getCookie('csrftoken'); // Fetch CSRF token from cookie
+      const response = await fetch('http://127.0.0.1:8000/assessor/save-qa/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': csrfToken, // Include CSRF token in headers
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Something went wrong!');
+      }
+
+      setMessage('File uploaded successfully!');
+      const responseData = await response.json();
+      console.log('File uploaded successfully:', responseData);
+    } catch (error) {
+      setMessage(`Error: ${error.message}`);
+      console.error('Error:', error);
+    }
+  };
 
   const handleUrlSubmit = async (e) => {
     e.preventDefault();
@@ -116,6 +114,28 @@ const handleFileUpload = async (e) => {
       };
       setFileInfo(currFileInfo);
       setRecentFiles([currFileInfo, ...recentFiles]);
+
+      const formData = new FormData();
+      formData.append('url_file', url); // Ensure the key matches the serializer field
+      formData.append('source', 'url'); // Add an identifier
+
+      const csrfToken = getCookie('csrftoken'); // Fetch CSRF token from cookie
+      const uploadResponse = await fetch('http://127.0.0.1:8000/assessor/save-qa/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': csrfToken, // Include CSRF token in headers
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.message || 'Something went wrong!');
+      }
+
+      setMessage('URL uploaded successfully!');
+      const uploadResponseData = await uploadResponse.json();
+      console.log('URL uploaded successfully:', uploadResponseData);
     } catch (error) {
       setError(`Error: ${error.message}`);
       console.error('Error:', error.message);
@@ -125,6 +145,14 @@ const handleFileUpload = async (e) => {
   const getCookie = (name) => {
     const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
     return cookieValue ? cookieValue.pop() : '';
+  };
+
+  const handleSubmit = (e) => {
+    if (uploadFile) {
+      handleFileUpload(e);
+    } else if (uploadUrl) {
+      handleUrlSubmit(e);
+    }
   };
 
   return (
@@ -159,10 +187,10 @@ const handleFileUpload = async (e) => {
               <div>
                 {/* File Input */}
                 <div className='flex flex-col items-center p-5 text-white'>
-                  <form onSubmit={handleFileUpload}>
+                  <form onSubmit={handleSubmit}>
                     <input type="file" onChange={handleFile} />
-                        <button type="submit" className='px-3 py-1 bg-white text-black rounded-md mt-2'>Submit</button>
-                      </form>
+                    <button type="submit" className='px-3 py-1 bg-white text-black rounded-md mt-2'>Submit</button>
+                  </form>
                 </div>
                 {/* File Preview */}
                 <div className='h-[600px] m-1 flex flex-wrap'>
@@ -204,52 +232,93 @@ const handleFileUpload = async (e) => {
               <div>
                 {/* Url Input */}
                 <div className='flex flex-col items-center p-5 text-white'>
-                  <form onSubmit={handleUrlSubmit} className='space-x-5'>
+                  <form onSubmit={handleSubmit}>
                     <input
                       type="text"
-                      value={url}
-                      onChange={handleUrl}
-                      className='text-black bg-white'
-                      placeholder='Enter Docx url'
+                      placeholder='Enter the url'
+                      className='px-2 rounded-md text-black w-2/3 h-8'
+                      onChange={(e) => setUrl(e.target.value)}
                     />
-                    <button className='px-2 bg-white text-black rounded-md'>Upload URL</button>
+                    <button type="submit" className='px-3 py-1 bg-white text-black rounded-md mt-2'>Submit</button>
                   </form>
-                  {error && <p>{error}</p>}
                 </div>
-                {/* file preview */}
+                {/* File Preview */}
+                <div className='h-[600px] m-1 flex flex-wrap'>
+                  {/* preview */}
+                  <div className='h-[430px] w-1/2 overflow-hidden flex items-center justify-center'>
+                    <div className='h-full w-fit'>
+                      {fileType === 'pdf' && file && <PdfPreview pdfUrl={URL.createObjectURL(file)} />}
+                      {fileType === 'docx' && file && <PdfPreview pdfUrl={URL.createObjectURL(file)} />}
+                    </div>
+                  </div>
+                  {/* File Info */}
+                  <div className='w-1/2 text-white'>
+                    <h2 className='font-bold'>File Information</h2>
+                    <div className='text-start p-4'>
+                      {file &&
+                        <div className="mt-4 space-y-20">
+                          <div>
+                            <p><strong>File Name:</strong> {fileInfo.name}</p>
+                            <p><strong>File Size:</strong> {fileInfo.size} KB</p>
+                            <p><strong>Upload Date:</strong> {fileInfo.date}</p>
+                            <p><strong>Upload Time:</strong> {fileInfo.time}</p>
+                          </div>
+                          <div className='flex items-center justify-center'>
+                            <button
+                              onClick={handleQSubmit}
+                              className='p-3 bg-white text-black rounded-md'
+                            >Generate Questions</button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
               </div>
             }
-            {/* Choice to choose upload url or file */}
+            {/* Choose between url/file */}
             {
               choice &&
-              <div className='p-10 h-3/4 flex items-center justify-center flex-col'>
+              <div className='flex flex-col items-center justify-center text-white'>
                 <button
-                  className='p-3 bg-white rounded-md' onClick={() => {
-                    setUploadFile(!uploadFile);
-                    setChoice(!choice);
-                  }}>Upload File</button>
-                <div className='text-white'>or</div>
+                  className='border-dashed border-2 border-ltgray w-2/3 h-20'
+                  onClick={() => {
+                    setUploadFile(true);
+                    setChoice(false);
+                    setUploadUrl(false);
+                  }}
+                >Upload file from the device</button>
+                <div className='py-5'>or</div>
                 <button
-                  className='p-3 bg-white rounded-md' onClick={() => {
-                    setUploadUrl(!uploadUrl);
-                    setChoice(!choice);
-                  }}>Upload URL</button>
+                  className='border-dashed border-2 border-ltgray w-2/3 h-20'
+                  onClick={() => {
+                    setUploadFile(false);
+                    setChoice(false);
+                    setUploadUrl(true);
+                  }}
+                >Upload file from the URL</button>
               </div>
             }
           </div>
         </div>
       }
-      {/* Top section upload box */}
-      <h2 className='w-full text-start text-xl p-5 pt-3'>Upload File</h2>
-      <div className='w-full flex items-center justify-center'>
-        <div
-          className='text-base bg-ltgray text-black font-light px-8 py-1 rounded-md text-center pb-4 cursor-pointer'
+      {/* Recent Files */}
+      <div className='h-[50%] m-4 p-2 border-dashed border-4 border-ltgray overflow-y-auto'>
+        <div className='font-bold'>Recent Files</div>
+        <ul className='list-disc'>
+          {recentFiles.map((file, index) => (
+            <li key={index}>
+              {file.name} ({file.size} KB) - {file.date} {file.time}
+            </li>
+          ))}
+        </ul>
+      </div>
+      {/* Upload Button */}
+      <div className='flex justify-center'>
+        <button
           onClick={toggle}
-          type="button"
-        >
-          <div className='text-4xl'>+</div>
-          <p>Upload Document</p>
-        </div>
+          className='bg-dkblue text-white px-4 py-2 rounded-md'
+        >Upload Document</button>
       </div>
     </div>
   );

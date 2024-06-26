@@ -8,6 +8,10 @@ class QuestionAnswerSerializer(serializers.ModelSerializer):
 
 
 
+class URLUploadSerializer(serializers.Serializer):
+    url = serializers.URLField()
+    source = serializers.CharField(default='url')
+
 class PDFUploadSerializer(serializers.Serializer):
     pdf_file = serializers.FileField()
 
