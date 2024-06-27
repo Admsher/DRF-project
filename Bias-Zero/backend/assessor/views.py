@@ -9,12 +9,16 @@ from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
 from .models import QuestionAnswer
 from .serializers import QuestionAnswerSerializer, PDFUploadSerializer, URLUploadSerializer
-from models.pdfanalyser import qa_generator_pdf, qa_generator_url
+from models.pdfanalyser.qa_generator_pdf import qa_generator_pdf
+from models.pdfanalyser.qa_generator_url import qa_generator_url
 import os
 import uuid
 import ast
 import json
-
+from .serializers import PDFUploadSerializer
+from django.core.files.storage import FileSystemStorage
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 load_dotenv()
 
 
@@ -108,232 +112,7 @@ def merge_and_save_dicts(dict1, dict2, dict3, output_filename):
         json.dump(result_final, json_file, indent=4)
     
     print(f"Merged dictionary saved to {output_filename}")
-    
-class QuestionAnswerAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
-    parser_classes = [MultiPartParser, FormParser]
 
-    def get(self, request, *args, **kwargs):
-        qa = QuestionAnswer.objects.all()
-        serializer = QuestionAnswerSerializer(qa, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        source = request.data.get('source')
-        if source == 'file':
-            return self.handle_file_upload(request)
-        elif source == 'url':
-            return self.handle_url_upload(request)
-        else:
-            return Response({'error': 'Invalid source type'}, status=status.HTTP_400_BAD_REQUEST)
-
-    def handle_file_upload(self, request):
-        serializer = PDFUploadSerializer(data=request.data)
-        print(serializer.errors)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        pdf_file = serializer.validated_data['pdf_file']
-        print(serializer.errors)
-        
-        try:    
-            qg_obj = qa_generator_pdf()
-            
-            #Pass the path of PDF here
-            parsed_data = qg_obj.load_or_parse_data(llamaparse_api_key,"data/Decision_tree.pdf")
-
-            embed_model= qg_obj.create_vector_database(parsed_data)
-
-            chat_model=qg_obj.chat_model(groq_api_key)
-
-            retriever=qg_obj.vectorstore(embed_model)
-
-            
-            # Create the list of questions level-wise
-            number_of_questions_levelwise = number_of_questions(questions_pdf)
-
-            print(number_of_questions_levelwise)
-
-            custom_prompt_template = """Use the following pieces of information to answer questions of the user.
-            Context: {context}
-            question: {question}
-            Only return the helpful content and nothing else.
-            """
-
-            prompt=qg_obj.set_custom_prompt(custom_prompt_template)
-                
-                    
-            query_template = f"""
-            Generate {questions_pdf} technical interview questions and answers suitable for a 
-            candidate applying for the following role :
-
-            Please generate the specified number of questions exactly.
-
-            **Job Profile:**
-
-            {job_profile}
-            Difficulty Distribution:
-            - Easy: {number_of_questions_levelwise[0]} questions
-            - Medium: {number_of_questions_levelwise[1]}questions
-            - Hard: {number_of_questions_levelwise[2]} questions
-            - Very Hard: {number_of_questions_levelwise[3]}questions
-            
-            first tell me the number of questions you are asked to create 
-            for each difficult level. stock to those numbers only. 
-            
-            Formulate interview questions based on the provided content only,
-            the specified difficulty levels, the responsibilities mentioned in the job 
-            profile, and the listed requirements.
-
-            Ensure that the exact specified number of questions are generated for each difficulty 
-            level only. Do not set the numbers of questions generated for each difficulty
-            level by yourself.
-
-            Do not use reference of any table, example or any diagram in the provided content as
-            the interviewee will not be provided with any material.
-
-            Do not add questions and answers by yourself other than the provided content.
-
-            Strictly use the provided content only.Do not generate questions
-            on your own.
-            
-            Return the output as a Python dictionary where keys are the integer serial 
-            number of the questions and answers, and values are Python dictionaries containing the 
-            question, answer, and difficulty level. 
-            Do not return anything other than the dictionary.
-            
-            The structure should be:
-            {{
-            "1": {{
-                "question": "Example question",
-                "answer": "Example answer",
-                "difficulty": "Easy"
-            }},
-            "2": {{
-                "question": "Example question",
-                "answer": "Example answer",
-                "difficulty": "Medium"
-            }},
-            ...
-            }}
-            """
-
-
-            response=qg_obj.output_generator(chat_model,retriever,prompt,query_template)
-
-
-            # print(type(response))
-
-            # print(response)
-
-            final_result=extract_and_convert_to_dict(response) 
-
-            print(final_result.keys())
-
-            merge_with_unique_keys(final_result,result_dict_pdf)
-
-            for key, value in result_dict_pdf.items():
-                print(str(key) + " ")
-                print(value)
-                print("\n")
-
-            print("\n\n\n\n\n\n\n\n")
-            return Response({'message': 'File uploaded and processed successfully!'}, status=status.HTTP_201_CREATED)
-        
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    def handle_url_upload(self, request):
-        serializer = URLUploadSerializer(data=request.data)
-        print(serializer.errors)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        url = serializer.validated_data['url']
-        print(serializer.errors)
-        try:
-            # Process the URL with qa_generator_url and save to your model here
-                    url="https://www.ibm.com/topics/machine-learning"
-
-                    qg_obj=qa_generator_url
-
-                    number_of_questions_levelwise = number_of_questions(questions_url)
-
-                    print(number_of_questions_levelwise)
-                    print(job_profile)
-
-                    prompt=ChatPromptTemplate.from_template ("""
-                    Generate {questions_url} technical interview questions and answers suitable for a 
-                    candidate applying for the following role :
-                                                            
-                    Please generate the specified number of questions exactly.
-
-                    **Job Profile:**
-
-                    {job_profile}
-                    Difficulty Distribution:
-                    - Easy: {easy} questions
-                    - Medium: {medium} questions
-                    - Hard: {hard} questions
-                    - Very Hard: {veryhard} questions
-                
-                    Formulate interview questions based on the provided content {data} only,
-                    the specified difficulty levels, the responsibilities mentioned in the job 
-                    profile, and the listed requirements. 
-
-                                
-                    Do not use reference of any table, example, any diagram or any such information from the
-                    content that is irrevelant to the interviewee from the provided content
-
-                    Do not add questions and answers by yourself other than the provided content.
-
-                    Return the output as a Python dictionary where keys are the integer serial 
-                    number of the questions and answers, and values are Python dictionaries containing the 
-                    question and answer. 
-                    Do not return anything other then the dictionary. Do not add the tag of difficulty level
-                    
-                    Return the output as a Python dictionary where keys are the integer serial 
-                    number of the questions and answers, and values are Python dictionaries containing the 
-                    question, answer, and difficulty level. 
-                    Do not return anything other than the dictionary.
-                    
-                    The structure should be:
-                    {{
-                    "1": {{
-                        "question": "Example question",
-                        "answer": "Example answer",
-                        "difficulty": "Easy"
-                    }},
-                    "2": {{
-                        "question": "Example question",
-                        "answer": "Example answer",
-                        "difficulty": "Medium"
-                    }},
-                    ...
-                    }}
-                    """)
-
-                
-
-                    qg_object=qa_generator_url(url,n_href=None,prompt_template=prompt)
-                    response=qg_object.generate_questions(questions_url,number_of_questions_levelwise)
-
-                    # print(response)
-                
-                    final_result=extract_and_convert_to_dict(response) 
-
-                    print(final_result.keys())
-
-                    merge_with_unique_keys(final_result,result_dict_url)
-
-                    for key, value in result_dict_url.items():
-                            print(f"{key}: {value}")
-                            print("\n\n")
-
-                    return Response({'message': 'URL processed successfully!'}, status=status.HTTP_201_CREATED)
-
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # class FaceResultView(APIView):
@@ -363,3 +142,120 @@ class QuestionAnswerAPIView(APIView):
 #             return Response({"message": "Images received"}, status=status.HTTP_201_CREATED)
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PDFUploadView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = PDFUploadSerializer(data=request.data)
+        if serializer.is_valid():
+            pdf = serializer.validated_data['pdf']
+            fs = FileSystemStorage()
+            filename = fs.save(pdf.name, pdf)
+            self.uploaded_file_url = fs.url(filename)
+            PDFUploadView.handle_file_upload(self, request)
+            return Response({"file_url": self.uploaded_file_url}, status=status.HTTP_201_CREATED)
+        
+        
+        else :
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def handle_file_upload(self, request):
+        serializer = PDFUploadSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        pdf_file = serializer.validated_data['pdf']
+        try:
+            # Ensure qa_generator_pdf is a class and instantiate it
+            qg_obj = qa_generator_pdf()
+            parsed_data = qg_obj.load_or_parse_data(llamaparse_api_key, pdf_file.read())
+            embed_model = qg_obj.create_vector_database(parsed_data)
+            chat_model = qg_obj.chat_model(groq_api_key)
+            retriever = qg_obj.vectorstore(embed_model)
+
+            number_of_questions_levelwise = number_of_questions(questions_pdf)
+            custom_prompt_template = """Use the following pieces of information to answer questions of the user.
+            Context: {context}
+            question: {question}
+            Only return the helpful content and nothing else.
+            """
+
+            prompt = qg_obj.set_custom_prompt(custom_prompt_template)
+            query_template = f"""
+            Generate {questions_pdf} technical interview questions and answers suitable for a 
+            candidate applying for the following role:
+
+            Please generate the specified number of questions exactly.
+
+            **Job Profile:**
+
+            {job_profile}
+            Difficulty Distribution:
+            - Easy: {number_of_questions_levelwise[0]} questions
+            - Medium: {number_of_questions_levelwise[1]} questions
+            - Hard: {number_of_questions_levelwise[2]} questions
+            - Very Hard: {number_of_questions_levelwise[3]} questions
+            """
+
+            response = qg_obj.output_generator(chat_model, retriever, prompt, query_template)
+
+            final_result = extract_and_convert_to_dict(response) 
+            merge_with_unique_keys(final_result, result_dict_pdf)
+
+            for key, value in result_dict_pdf.items():
+                print(f"{key}: {value}")
+                print("\n")
+
+            return Response({'message': 'File uploaded and processed successfully!'}, status=status.HTTP_201_CREATED)
+        
+        except Exception as e:
+            print(e)
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def handle_url_upload(self, request):
+        serializer = URLUploadSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        url = serializer.validated_data['url']
+        try:
+            # Ensure qa_generator_url is a class and instantiate it
+            qg_obj = qa_generator_url(url, n_href=None, prompt_template=None)
+            number_of_questions_levelwise = number_of_questions(questions_url)
+
+            custom_prompt_template = """Use the following pieces of information to answer questions of the user.
+            Context: {context}
+            question: {question}
+            Only return the helpful content and nothing else.
+            """
+
+            prompt = qg_obj.set_custom_prompt(custom_prompt_template)
+            query_template = f"""
+            Generate {questions_url} technical interview questions and answers suitable for a 
+            candidate applying for the following role:
+
+            Please generate the specified number of questions exactly.
+
+            **Job Profile:**
+
+            {job_profile}
+            Difficulty Distribution:
+            - Easy: {number_of_questions_levelwise[0]} questions
+            - Medium: {number_of_questions_levelwise[1]} questions
+            - Hard: {number_of_questions_levelwise[2]} questions
+            - Very Hard: {number_of_questions_levelwise[3]} questions
+            """
+
+            response = qg_obj.output_generator(prompt, query_template)
+
+            final_result = extract_and_convert_to_dict(response) 
+            merge_with_unique_keys(final_result, result_dict_url)
+
+            for key, value in result_dict_url.items():
+                print(f"{key}: {value}")
+                print("\n")
+
+            return Response({'message': 'URL processed successfully!'}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

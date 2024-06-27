@@ -12,14 +12,10 @@ class URLUploadSerializer(serializers.Serializer):
     url = serializers.URLField()
     source = serializers.CharField(default='url')
 
+from rest_framework import serializers
+
 class PDFUploadSerializer(serializers.Serializer):
-    pdf_file = serializers.FileField()
-
-    def validate_pdf_file(self, value):
-        if value.content_type not in ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']:
-            raise serializers.ValidationError('Upload pdf or docx format files only.')
-        return value
-
+    pdf = serializers.FileField()
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
