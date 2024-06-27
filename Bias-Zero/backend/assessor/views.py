@@ -8,7 +8,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
 from .models import QuestionAnswer
-from .serializers import QuestionAnswerSerializer, PDFUploadSerializer, URLUploadSerializer
+from .serializers import QuestionAnswerSerializer, PDFUploadSerializer, URLUploadSerializer,FileUploadSerializer
 from models.pdfanalyser.qa_generator_pdf import qa_generator_pdf
 from models.pdfanalyser.qa_generator_url import qa_generator_url
 import os
@@ -146,10 +146,11 @@ def merge_and_save_dicts(dict1, dict2, dict3, output_filename):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PDFUploadView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
     def post(self, request, *args, **kwargs):
-        serializer = PDFUploadSerializer(data=request.data)
+        serializer = FileUploadSerializer(data=request.data)
         if serializer.is_valid():
-            pdf = serializer.validated_data['pdf']
+            pdf = serializer.validated_data['pdf_file']
             fs = FileSystemStorage()
             filename = fs.save(pdf.name, pdf)
             self.uploaded_file_url = fs.url(filename)

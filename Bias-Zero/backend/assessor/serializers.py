@@ -30,3 +30,13 @@ class UploadedImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = UploadedImage
         fields = ['image', 'uploaded_at']
+        
+class FileUploadSerializer(serializers.Serializer):
+    pdf_file = serializers.FileField(required=False)
+    url_file = serializers.URLField(required=False)
+    source = serializers.CharField(required=True)
+
+    def validate(self, data):
+        if not data.get('pdf_file') and not data.get('url_file'):
+            raise serializers.ValidationError('Either pdf_file or url_file is required.')
+        return data
