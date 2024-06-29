@@ -9,6 +9,11 @@ from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
 from .models import QuestionAnswer
 from .serializers import QuestionAnswerSerializer, PDFUploadSerializer, URLUploadSerializer,FileUploadSerializer
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from .models import PDFFile
+from .serializers import PDFFileSerializer
 from models.pdfanalyser.qa_generator_pdf import qa_generator_pdf
 from models.pdfanalyser.qa_generator_url import qa_generator_url
 import os
@@ -145,20 +150,17 @@ def merge_and_save_dicts(dict1, dict2, dict3, output_filename):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class PDFUploadView(APIView):
-    parser_classes = [MultiPartParser, FormParser]
-    def post(self, request, *args, **kwargs):
-        serializer = FileUploadSerializer(data=request.data)
+class PDFUploadView(viewsets.ViewSet):
+    serializer_class = PDFFileSerializer
+
+    @action(detail=False, methods=['post'])
+    def upload(self, request):
+        data = request.data
+        serializer = self.serializer_class(data=data)
         if serializer.is_valid():
-            pdf = serializer.validated_data['pdf_file']
-            fs = FileSystemStorage()
-            filename = fs.save(pdf.name, pdf)
-            self.uploaded_file_url = fs.url(filename)
-            PDFUploadView.handle_file_upload(self, request)
-            return Response({"file_url": self.uploaded_file_url}, status=status.HTTP_201_CREATED)
-        
-        
-        else :
+            # Your code for saving the PDF file goes here
+            pass
+        else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     def handle_file_upload(self, request):
         serializer = PDFUploadSerializer(data=request.data)
@@ -260,3 +262,6 @@ class PDFUploadView(APIView):
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
