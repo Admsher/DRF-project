@@ -158,7 +158,7 @@ class PDFUploadView(viewsets.ViewSet):
         data = request.data
         serializer = self.serializer_class(data=data)
         if serializer.is_valid():
-            # Your code for saving the PDF file goes here
+            PDFUploadView.handle_file_upload(self, request)
             pass
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
