@@ -155,7 +155,7 @@ class PDFUploadView(viewsets.ViewSet):
 
     
     
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['get'])
     def fetch(self, request):
         data = request.data
         serializer = self.serializer_class(data=data)
