@@ -153,6 +153,8 @@ def merge_and_save_dicts(dict1, dict2, dict3, output_filename):
 class PDFUploadView(viewsets.ViewSet):
     serializer_class = PDFFileSerializer
 
+    
+    
     @action(detail=False, methods=['post'])
     def upload(self, request):
         data = request.data
@@ -160,6 +162,19 @@ class PDFUploadView(viewsets.ViewSet):
         if serializer.is_valid():
             PDFUploadView.handle_file_upload(self, request)
             pass
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+    
+    @action(detail=False, methods=['post'])
+    def upload(self, request):
+        data = request.data
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid():
+            PDFUploadView.handle_file_upload(self, request)
+            print("Uploaded")
+        
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     def handle_file_upload(self, request):
