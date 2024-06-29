@@ -24,6 +24,8 @@ from .serializers import PDFUploadSerializer
 from django.core.files.storage import FileSystemStorage
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.conf import settings
+from django.http import JsonResponse
 load_dotenv()
 
 
@@ -154,17 +156,15 @@ class PDFUploadView(viewsets.ViewSet):
     serializer_class = PDFFileSerializer
 
     
-    
-    @action(detail=False, methods=['get'])
-    def fetch(self, request):
-        data = request.data
-        serializer = self.serializer_class(data=data)
-        if serializer.is_valid():
-            PDFUploadView.handle_file_upload(self, request)
-            pass
+    @action(detail=True, methods=['get'])
+    def questions(self, request, pk=None):
+        file_path = os.path.join(settings.MEDIA_ROOT, 'questions_answers.json')
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as json_file:
+                data = json.load(json_file)
+            return JsonResponse(data, safe=False)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response({"detail": "File not found."}, status=status.HTTP_404_NOT_FOUND)
         
     
     @action(detail=False, methods=['post'])
