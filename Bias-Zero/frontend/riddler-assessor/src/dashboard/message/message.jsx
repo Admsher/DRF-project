@@ -4,8 +4,7 @@ import Medium from './components/medium';
 import Hard from './components/hard';
 import VeryHard from './components/veryhard';
 import Questions from './components/questions';
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+import axios from 'axios';
 
 function Message() {
   const [easy, setEasy] = useState([]);
@@ -15,48 +14,31 @@ function Message() {
   const [totalQuestions, setTotalQuestions] = useState([]);
 
   useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/assessor/save-qa');
+        const questions = response.data;
+
+        const formattedQuestions = Object.keys(questions).map(key => ({
+          question: questions[key].question,
+          answer: questions[key].answer,
+          difficulty: questions[key].difficulty
+        }));
+
+        setTotalQuestions(formattedQuestions);
+
+        // Sort questions based on difficulty
+        setEasy(formattedQuestions.filter(q => q.difficulty.toLowerCase() === 'easy'));
+        setMedium(formattedQuestions.filter(q => q.difficulty.toLowerCase() === 'medium'));
+        setHard(formattedQuestions.filter(q => q.difficulty.toLowerCase() === 'hard'));
+        setVeryHard(formattedQuestions.filter(q => q.difficulty.toLowerCase() === 'very hard'));
+      } catch (error) {
+        console.error('There was an error fetching the questions!', error);
+      }
+    };
+
     fetchQuestions();
   }, []);
-
-  const fetchQuestions = async () => {
-    try {
-      const response = await fetch(`127.0.0.1:8000/assessor/save-qa/`, {
-        method: 'GET',
-        credentials: 'same-origin', // include cookies (including CSRF tokens) from the same origin
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': getCookie('csrftoken'), // Include CSRF token from cookie
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const questions = await response.json();
-
-      // Categorize questions by difficulty
-      const easyQuestions = questions.filter(q => q.difficulty === 'easy');
-      const mediumQuestions = questions.filter(q => q.difficulty === 'medium');
-      const hardQuestions = questions.filter(q => q.difficulty === 'hard');
-      const veryHardQuestions = questions.filter(q => q.difficulty === 'very hard');
-
-      // Update state with categorized questions
-      setEasy(easyQuestions);
-      setMedium(mediumQuestions);
-      setHard(hardQuestions);
-      setVeryHard(veryHardQuestions);
-      setTotalQuestions(questions);
-    } catch (error) {
-      console.error('Error fetching questions:', error);
-      // Handle error state or logging as needed
-    }
-  };
-
-  const getCookie = (name) => {
-    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
-    return cookieValue ? cookieValue.pop() : '';
-  };
 
   return (
     <div>
@@ -69,14 +51,7 @@ function Message() {
       </div>
       {/* Question selection */}
       <h2 className='font-bold ml-4 text-dkblue'>Select Questions</h2>
-      <Questions
-        totalQuestions={totalQuestions}
-        setTotalQuestions={setTotalQuestions}
-        setEasy={setEasy}
-        setMedium={setMedium}
-        setHard={setHard}
-        setVeryHard={setVeryHard}
-      />
+      <Questions totalQuestions={totalQuestions} setTotalQuestions={setTotalQuestions} setEasy={setEasy} setMedium={setMedium} setHard={setHard} setVeryHard={setVeryHard} />
     </div>
   );
 }
