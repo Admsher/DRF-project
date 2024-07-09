@@ -132,10 +132,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'file')
 MEDIA_URL = '/file/'
 
 CORS_ORIGIN_WHITELIST = (
-    'http://localhost:3002',
+    'http://localhost:3000',
 )
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3002",  # Your frontend URL
+    "http://localhost:3000",  # Your frontend URL
     # "https://yourdomain.com",  # Additional allowed origin if necessary
 ]
 
