@@ -17,7 +17,6 @@ from .serializers import PDFFileSerializer
 from models.pdfanalyser.qa_generator_pdf import qa_generator_pdf
 from models.pdfanalyser.qa_generator_url import qa_generator_url
 from models.pdfanalyser.qa_generator_gen_ai import qa_generator_gen_ai
-
 import os
 import uuid
 import ast
@@ -28,12 +27,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.conf import settings
 from django.http import JsonResponse
+from rest_framework import generics
 load_dotenv()
 
 
 llamaparse_api_key = "llx-KZm8M1tyCNWv1WQfcp9QyDAcbJSh8CcHVfCNvN2MB3UZy7Pq"
 groq_api_key = "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"
 
+# Flags for question generation sources
 # Flags for question generation sources
 pdf = True
 url = False
@@ -89,11 +90,11 @@ def merge_and_save_dicts(dict1, dict2, dict3, output_filename):
         json.dump(result_final, json_file, indent=4)
     print(f"Merged dictionary saved to {output_filename}")
 
-class PDFFileViewSet(viewsets.ModelViewSet):
+class PDFFileViewSet(generics.ListCreateAPIView):
     queryset = PDFFile.objects.all()
     serializer_class = PDFFileSerializer
     permission_classes = (permissions.AllowAny,)
-
+  
     def create(self, request, *args, **kwargs):
         data = request.data
         if isinstance(data, list):
@@ -271,13 +272,16 @@ class PDFFileViewSet(viewsets.ModelViewSet):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-def get_question_answers(request):
-    file_path = os.path.join(settings.MEDIA_ROOT, 'questions_answers.json')
-    print('san'+file_path) 
-    if os.path.exists(file_path):
-        with open(file_path, 'r') as json_file:
-            data = json.load(json_file)
-        print(JsonResponse(data, safe=False))
-        return JsonResponse(data, safe=False)
-    else:
-        return Response({"detail": "File not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class GetQuestionAnswers(APIView):
+    def get_question_answers(request):
+                file_path = os.path.join(settings.MEDIA_ROOT, 'questions_answers.json')
+                print('san'+file_path) 
+                if os.path.exists(file_path):
+                    with open(file_path, 'r') as json_file:
+                        data = json.load(json_file)
+                    print(JsonResponse(data, safe=False))
+                    return JsonResponse(data, safe=False)
+                else:
+                    return Response({"detail": "File not found."}, status=status.HTTP_404_NOT_FOUND)

@@ -16,7 +16,7 @@ function Message() {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/assessor/save-qa');
+        const response = await axios.get('http://127.0.0.1:8000/assessor/get-qa');
         const questions = response.data;
 
         const formattedQuestions = Object.keys(questions).map(key => ({

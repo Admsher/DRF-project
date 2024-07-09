@@ -81,7 +81,7 @@ function UploadDoc() {
     formData.append('url', false);
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/pdfs/', formData, {
+      const response = await axios.post('http://127.0.0.1:8000/assessor/save-qa/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -90,8 +90,7 @@ function UploadDoc() {
       setMessage('File uploaded successfully!');
       console.log('File uploaded successfully:', response.data);
 
-      // After successful upload, fetch question and answers
-      fetchQuestionAnswers();
+      
     } catch (error) {
       if (error.response) {
         setMessage(`Error: ${error.response.data}`);
@@ -106,23 +105,7 @@ function UploadDoc() {
     }
   };
 
-  const fetchQuestionAnswers = async () => {
-    try {
-      const response = await axios.get('http://127.0.0.1:8000/assessor/save-qa');
-      const qaData = response.data;
-      const formattedQA = Object.keys(qaData).map(key => ({
-        question: qaData[key].question,
-        answer: qaData[key].answer,
-        difficulty: qaData[key].difficulty
-      }));
-      setQuestionAnswers(formattedQA);
-      console.log('Qa get successfully:', formattedQA);
-    } catch (error) {
-      setError('Failed to fetch question answers.');
-      console.error('Fetch error:', error);
-    }
-  };
-
+ 
   const handleUrlChange = (e) => {
     setUrl(e.target.value);
   };
