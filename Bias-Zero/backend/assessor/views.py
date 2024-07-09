@@ -273,15 +273,4 @@ class PDFFileViewSet(generics.ListCreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-class GetQuestionAnswers(APIView):
-    def get_question_answers(request):
-                file_path = os.path.join(settings.MEDIA_ROOT, 'questions_answers.json')
-                print('san'+file_path) 
-                if os.path.exists(file_path):
-                    with open(file_path, 'r') as json_file:
-                        data = json.load(json_file)
-                    print(JsonResponse(data, safe=False))
-                    return JsonResponse(data, safe=False)
-                else:
-                    return Response({"detail": "File not found."}, status=status.HTTP_404_NOT_FOUND)
+    
