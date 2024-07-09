@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+}
+body {
+  font-family: "Inter", sans-serif;
+}
+.wrapper {
+  max-width: 1330px;
+  padding: 0 20px;
+  margin: 0 auto;
+}
+.wrapper-l {
+  max-width: 1430px;
+  padding: 0 20px;
+  margin: 0 auto;
+}
+.link-hover-underline {
+  position: relative;
+  text-decoration: none;
+}
+.link-hover-underline::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: currentColor;
+  transition: width 0.3s ease-in-out;
+  border-radius: 24px;
+}
+.link-hover-underline:hover::after {
+  width: 100%;
+}
+.swiper-pagination > span {
+  background-color: #1a73e8;
+  padding: 8px;
+}

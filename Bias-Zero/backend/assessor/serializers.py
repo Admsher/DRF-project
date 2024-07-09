@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import QuestionAnswer, Post, UploadedImage,PDFFile
+from .models import QuestionAnswer, Post,PDFFile
 
 from rest_framework import serializers
 from .models import PDFFile ,QuestionAnswer, Post
