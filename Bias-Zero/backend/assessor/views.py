@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 from .models import QuestionAnswer
 from .serializers import QuestionAnswerSerializer, PDFUploadSerializer, URLUploadSerializer,FileUploadSerializer
 from rest_framework import viewsets, status
-from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import PDFFile
 from .serializers import PDFFileSerializer
@@ -28,6 +27,9 @@ from django.utils.decorators import method_decorator
 from django.conf import settings
 from django.http import JsonResponse
 from rest_framework import generics
+from django.http import JsonResponse, HttpResponseNotFound
+from rest_framework.decorators import api_view, renderer_classes
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 load_dotenv()
 
 
@@ -272,5 +274,17 @@ class PDFFileViewSet(generics.ListCreateAPIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class QuestionAnswerViewSet(viewsets.ModelViewSet):
+    queryset = QuestionAnswer.objects.all()
+    serializer_class = QuestionAnswerSerializer
+    permission_classes = [permissions.AllowAny]  # Add your desired permissions here
 
-    
+    def get_question_answers(self, request):
+        file_path = os.path.join(settings.MEDIA_ROOT, 'questions_answers.json')
+        
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as json_file:
+                data = json.load(json_file)
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "File not found."}, status=status.HTTP_404_NOT_FOUND)
