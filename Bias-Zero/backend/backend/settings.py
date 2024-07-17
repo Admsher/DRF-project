@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'assessor',
     'home',
+    'credential',
     'rest_framework',
     'corsheaders',
 ]

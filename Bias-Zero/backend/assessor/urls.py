@@ -5,12 +5,11 @@ from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from .views import QuestionAnswerViewSet
 
-
 router = DefaultRouter()
 router.register(r'get-qa', QuestionAnswerViewSet, basename='get-qa')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('save-qa/', views.PDFFileViewSet.as_view()),
+    path('save-qa/', views.PDFFileViewSet.as_view({'post': 'create'}), name='save-qa'),
   
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

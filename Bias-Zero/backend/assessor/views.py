@@ -33,14 +33,14 @@ from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 load_dotenv()
 
 
-llamaparse_api_key = "llx-KZm8M1tyCNWv1WQfcp9QyDAcbJSh8CcHVfCNvN2MB3UZy7Pq"
-groq_api_key = "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"
+# Set API keys directly for now
+llamaparse_api_key = ""
+groq_api_key = ""
 
-# Flags for question generation sources
 # Flags for question generation sources
 pdf = True
 url = False
-gen_ai = False
+gen_ai = True
 
 options = [pdf, url, gen_ai]
 
@@ -51,7 +51,7 @@ if number_of_options == 1:
 elif number_of_options == 2:
     questions_pdf, questions_url, questions_gen_ai = (20 if option else 0 for option in options)
 else:
-    questions_pdf, questions_url, questions_gen_ai = 13, 13, 14
+    questions_pdf, questions_url, questions_gen_ai = 20, 0, 20
 
 def number_of_questions(no_questions):
     base_number = no_questions // 4
@@ -89,14 +89,16 @@ def merge_and_save_dicts(dict1, dict2, dict3, output_filename):
         print("All input dictionaries are empty. Nothing to save.")
         return
     with open(output_filename, "w") as json_file:
+        json_file.write(" ")  # This clears the file
+    with open(output_filename, "w") as json_file:
         json.dump(result_final, json_file, indent=4)
     print(f"Merged dictionary saved to {output_filename}")
 
-class PDFFileViewSet(generics.ListCreateAPIView):
+class PDFFileViewSet(viewsets.ModelViewSet):
     queryset = PDFFile.objects.all()
     serializer_class = PDFFileSerializer
     permission_classes = (permissions.AllowAny,)
-  
+
     def create(self, request, *args, **kwargs):
         data = request.data
         if isinstance(data, list):
@@ -183,7 +185,7 @@ class PDFFileViewSet(generics.ListCreateAPIView):
 
                 response = qg_obj.output_generator(chat_model, retriever, prompt, query_template)
                 final_result = extract_and_convert_to_dict(response)
-                merge_with_count_keys(final_result, result_dict_pdf)
+                merge_with_unique_keys(final_result, result_dict_pdf)
 
             if url:
                 qg_obj = qa_generator_url(url="https://www.ibm.com/topics/machine-learning")
@@ -223,7 +225,7 @@ class PDFFileViewSet(generics.ListCreateAPIView):
                 ...
                 }}
                 """)
-                response = qg_obj.generate_questions(questions_url, number_of_questions_levelwise)
+                response = qg_obj.question_generator(questions_url, number_of_questions_levelwise)
                 final_result = extract_and_convert_to_dict(response)
                 merge_with_unique_keys(final_result, result_dict_url)
 
@@ -263,7 +265,9 @@ class PDFFileViewSet(generics.ListCreateAPIView):
                 ...
                 }}
                 """
-                response = qg_obj.generate_questions(number_of_questions_levelwise, job_profile, custom_prompt)
+                prompt = PromptTemplate(template=custom_prompt,
+                            input_variables=['number_of_questions', 'job_profile','easy','medium','hard','very_hard'])
+                response = qg_obj.question_generator(job_profile,prompt,questions_gen_ai,number_of_questions_levelwise)
                 final_result = extract_and_convert_to_dict(response)
                 merge_with_unique_keys(final_result, result_dict_gen_ai)
 
@@ -273,7 +277,6 @@ class PDFFileViewSet(generics.ListCreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 class QuestionAnswerViewSet(viewsets.ModelViewSet):
     queryset = QuestionAnswer.objects.all()
     serializer_class = QuestionAnswerSerializer
