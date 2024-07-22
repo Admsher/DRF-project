@@ -36,6 +36,13 @@ class CustomUser(AbstractUser):
     email = models.EmailField(verbose_name='email address', max_length=255, unique=True)
     username = models.CharField(max_length=30, unique=True)
     mobile = models.CharField(max_length=15, unique=True)
+    contact_number = models.CharField(max_length=20, blank=True, null=True)
+    company = models.CharField(max_length=255, blank=True, null=True)
+    position = models.CharField(max_length=255, blank=True, null=True)
+    company_details = models.TextField(blank=True, null=True)
+    company_description = models.TextField(blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
+
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)

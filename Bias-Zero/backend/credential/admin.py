@@ -1,27 +1,33 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.admin import UserAdmin as UserAdmin
 from django.contrib.auth.models import Group
 from .models import CustomUser
 
-class UserAdmin(BaseUserAdmin):
-    list_display = ('email', 'username', 'mobile', 'is_admin')
-    list_filter = ('is_admin',)
+class CustomUserAdmin(UserAdmin):
+    # Define the fields to be used in displaying the CustomUser model.
+    # These can be the fields you want to display or include in the admin form.
+    model = CustomUser
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active')
+    list_filter = ('is_staff', 'is_active', 'is_superuser')
+    search_fields = ('username', 'email', 'first_name', 'last_name')
+    ordering = ('-date_joined',)  # Example ordering, you can adjust as needed
+
+    # Optionally, you can also customize the fieldsets if needed
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('username', 'mobile')}),
-        ('Permissions', {'fields': ('is_admin',)}),
+        (None, {'fields': ('username', 'email', 'password')}),
+        ('Personal info', {'fields': ('first_name', 'last_name', 'mobile', 'contact_number', 'company', 'position', 'company_details', 'company_description', 'profile_picture')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'user_permissions')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
+    
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'username', 'mobile', 'password1', 'password2'),
+            'fields': ('username', 'email', 'password1', 'password2'),
         }),
     )
-    search_fields = ('email', 'username', 'mobile')
-    ordering = ('email',)
-    filter_horizontal = ()
 
-admin.site.register(CustomUser, UserAdmin)
+admin.site.register(CustomUser, CustomUserAdmin)
 
 # Unregister the Group model from admin.
 admin.site.unregister(Group)
