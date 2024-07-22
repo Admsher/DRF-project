@@ -149,7 +149,7 @@ if pdf:
     Only return the helpful content and nothing else.
     """
 
-    prompt=qg_obj.set_custom_prompt(custom_prompt_template)
+    prompt=qg_obj.output_generator(custom_prompt_template)
         
             
     query_template = f"""

@@ -34,13 +34,13 @@ load_dotenv()
 
 
 # Set API keys directly for now
-llamaparse_api_key = ""
-groq_api_key = ""
+llamaparse_api_key = "llx-KZm8M1tyCNWv1WQfcp9QyDAcbJSh8CcHVfCNvN2MB3UZy7Pq"
+groq_api_key = "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"
 
 # Flags for question generation sources
 pdf = True
 url = False
-gen_ai = True
+gen_ai = False
 
 options = [pdf, url, gen_ai]
 
@@ -98,7 +98,6 @@ class PDFFileViewSet(viewsets.ModelViewSet):
     queryset = PDFFile.objects.all()
     serializer_class = PDFFileSerializer
     permission_classes = (permissions.AllowAny,)
-
     def create(self, request, *args, **kwargs):
         data = request.data
         if isinstance(data, list):
@@ -225,7 +224,7 @@ class PDFFileViewSet(viewsets.ModelViewSet):
                 ...
                 }}
                 """)
-                response = qg_obj.question_generator(questions_url, number_of_questions_levelwise)
+                response = qg_obj.generate_questions(questions_url, number_of_questions_levelwise)
                 final_result = extract_and_convert_to_dict(response)
                 merge_with_unique_keys(final_result, result_dict_url)
 

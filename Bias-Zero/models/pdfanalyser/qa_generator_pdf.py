@@ -24,7 +24,7 @@ class qa_generator_pdf:
         pass
 
     def load_or_parse_data(self,llamaparse_api_key,path):
-         data_file = "./data/parsed_data.pkl"
+         data_file = "parsed_data.pkl"
 
          if os.path.exists(data_file):
              # Load the parsed data from the file
@@ -64,11 +64,11 @@ class qa_generator_pdf:
          llama_parse_documents = llama_parse_documents
        
 
-         with open('data/output.md', 'a') as f:  # Open the file in append mode ('a')
+         with open('output.md', 'a') as f:  # Open the file in append mode ('a')
             for doc in llama_parse_documents:
                f.write(doc.text + '\n')
 
-         markdown_path = "data/output.md"
+         markdown_path = "output.md"
          loader = UnstructuredMarkdownLoader(markdown_path)
 
          #loader = DirectoryLoader('data/', glob="**/*.md", show_progress=True)
@@ -139,5 +139,12 @@ class qa_generator_pdf:
         
         
         return response['result']
+    def set_custom_prompt(self,custom_prompt_template):
+       """
+       Prompt template for QA retrieval for each vectorstore
+       """
+       prompt = PromptTemplate(template=custom_prompt_template,
+                            input_variables=['context', 'question'])
+       return prompt
         
         
