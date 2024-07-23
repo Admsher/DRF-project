@@ -25,7 +25,7 @@ class CustomUserManager(BaseUserManager):
         return user
 
 class CustomUser(AbstractUser):
-    # email = models.EmailField(verbose_name='email address', max_length=255, unique=True)
+    email = models.EmailField(verbose_name='email address', max_length=255, unique=True)
     username = models.CharField(max_length=30, unique=True)
     mobile = models.CharField(max_length=15, unique=True)
     contact_number = models.CharField(max_length=20, blank=True, null=True)
@@ -41,8 +41,8 @@ class CustomUser(AbstractUser):
 
     objects = CustomUserManager()
 
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['mobile','email']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['mobile','username']
 
     def __str__(self):
         return self.email
