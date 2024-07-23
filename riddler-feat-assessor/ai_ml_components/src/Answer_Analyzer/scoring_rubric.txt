@@ -1,0 +1,17 @@
+Clarity and Accuracy
+Depth and Detail
+Relevance to the Question
+Overall Impression
+
+or 
+
+if similarity > 0.8:
+            return 5  # High score
+         elif similarity > 0.6:
+             return 4
+         elif similarity > 0.4:
+             return 3
+         elif similarity > 0.2:
+             return 2
+         else:
+            return 1  # Low score

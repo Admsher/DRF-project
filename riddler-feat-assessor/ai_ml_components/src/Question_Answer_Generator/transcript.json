@@ -1,0 +1,202 @@
+{
+    "8594f79b-1640-45d6-9548-14ba0bd1bc00": {
+        "question": "What is the difference between supervised and unsupervised learning?",
+        "answer": "Supervised learning involves training a model on labeled data, while unsupervised learning involves training a model on unlabeled data.",
+        "difficulty": "Easy"
+    },
+    "1fef1916-4036-4b59-b6b4-f090548f5b8f": {
+        "question": "What is the difference between regression and classification?",
+        "answer": "Regression is a type of supervised learning that predicts a continuous value, while classification is a type of supervised learning that predicts a categorical value.",
+        "difficulty": "Easy"
+    },
+    "f918b65b-dd84-4d4b-b5be-7aca50ff7386": {
+        "question": "What is the difference between a parametric and non-parametric model?",
+        "answer": "Parametric models have a fixed number of parameters, while non-parametric models do not have a fixed number of parameters.",
+        "difficulty": "Easy"
+    },
+    "ec030010-9dd3-4800-9b38-420585f32e04": {
+        "question": "What is the difference between a decision tree and a random forest?",
+        "answer": "A decision tree is a single model that makes predictions based on a series of binary decisions, while a random forest is an ensemble of decision trees that makes predictions by aggregating the predictions of each tree.",
+        "difficulty": "Medium"
+    },
+    "a9aafdda-1360-43c0-bccb-f34b74f2be7a": {
+        "question": "What is the difference between L1 and L2 regularization?",
+        "answer": "L1 regularization adds a penalty equal to the absolute value of the magnitude of the coefficients, while L2 regularization adds a penalty equal to the square of the magnitude of the coefficients.",
+        "difficulty": "Medium"
+    },
+    "e490d043-5492-4e09-bbbb-ac8e5f0f77b9": {
+        "question": "What is the difference between precision and recall?",
+        "answer": "Precision is the proportion of true positives among all positive predictions, while recall is the proportion of true positives among all actual positives.",
+        "difficulty": "Medium"
+    },
+    "ae3bbcf6-1799-4e56-b146-76e832081ba8": {
+        "question": "What is the difference between a confusion matrix and a ROC curve?",
+        "answer": "A confusion matrix is a table that summarizes the performance of a classification model, while a ROC curve is a plot that shows the tradeoff between the true positive rate and the false positive rate.",
+        "difficulty": "Medium"
+    },
+    "49dcc865-ba0b-48d4-b2b2-5f17db2c0440": {
+        "question": "What is the difference between a generative and discriminative model?",
+        "answer": "Generative models learn the joint probability distribution of the input and output variables, while discriminative models learn the conditional probability distribution of the output given the input.",
+        "difficulty": "Hard"
+    },
+    "4bc944bf-f995-4bb7-a9bc-c822a117bbf9": {
+        "question": "What is the difference between a support vector machine and a neural network?",
+        "answer": "A support vector machine is a linear model that separates the classes with the largest margin, while a neural network is a non-linear model that learns a series of transformations to map the input to the output.",
+        "difficulty": "Hard"
+    },
+    "926dc37d-5955-4a75-b5dd-294f771c0860": {
+        "question": "What is the difference between batch and online learning?",
+        "answer": "Batch learning trains a model on the entire dataset at once, while online learning trains a model on the dataset incrementally, one example at a time.",
+        "difficulty": "Hard"
+    },
+    "f84c3cd4-d611-4006-9403-ec3e118aa16a": {
+        "question": "What is the difference between a feature and a label?",
+        "answer": "A feature is an input variable, while a label is an output variable.",
+        "difficulty": "Easy"
+    },
+    "cb399c0e-de26-4388-82e3-582aa65e018a": {
+        "question": "What is the difference between a feature vector and a feature matrix?",
+        "answer": "A feature vector is a one-dimensional array of features, while a feature matrix is a two-dimensional array of features.",
+        "difficulty": "Easy"
+    },
+    "b975cdae-0340-496f-b041-295a39461f4c": {
+        "question": "What is the difference between a feature scaling and a feature normalization?",
+        "answer": "Feature scaling transforms the features to have the same range, while feature normalization transforms the features to have the same mean and standard deviation.",
+        "difficulty": "Medium"
+    },
+    "4fdd4c05-cd79-438b-b074-05841a2f3506": {
+        "question": "What is the difference between a feature engineering and a feature selection?",
+        "answer": "Feature engineering creates new features from the existing features, while feature selection selects a subset of the existing features.",
+        "difficulty": "Medium"
+    },
+    "565798e6-4063-4bba-9605-baeca6e964c3": {
+        "question": "What is the difference between a feature importance and a feature relevance?",
+        "answer": "Feature importance measures the contribution of a feature to the model's performance, while feature relevance measures the correlation between a feature and the target variable.",
+        "difficulty": "Medium"
+    },
+    "08f7f98f-781d-4b04-9f12-8d20c603dcfb": {
+        "question": "What is the difference between a feature ranking and a feature selection?",
+        "answer": "Feature ranking orders the features based on their importance or relevance, while feature selection selects a subset of the features.",
+        "difficulty": "Hard"
+    },
+    "645d83ef-318a-4729-b94e-07bd8cba65ac": {
+        "question": "What is the difference between a feature extraction and a feature learning?",
+        "answer": "Feature extraction transforms the features to a lower-dimensional space, while feature learning learns the features from the data.",
+        "difficulty": "Hard"
+    },
+    "f3ee5fe2-2f9f-4d59-a3c9-6b46427b5f5e": {
+        "question": "What is the difference between a feature representation and a feature transformation?",
+        "answer": "Feature representation encodes the features in a way that is suitable for the model, while feature transformation transforms the features to a different space.",
+        "difficulty": "Hard"
+    },
+    "a72c9950-8ddd-4398-b94b-455de043669e": {
+        "question": "What is the difference between a feature selection algorithm and a feature ranking algorithm?",
+        "answer": "A feature selection algorithm selects a subset of the features, while a feature ranking algorithm orders the features based on their importance or relevance.",
+        "difficulty": "Very Hard"
+    },
+    "87bb5d99-6f2a-4724-8fc0-5fec675e2460": {
+        "question": "What is the difference between a feature selection method and a feature selection criterion?",
+        "answer": "A feature selection method is a procedure for selecting a subset of the features, while a feature selection criterion is a measure for evaluating the quality of the selected subset.",
+        "difficulty": "Very Hard"
+    },
+    "53602526-af64-43e5-97df-464e0481941a": {
+        "question": "What is the difference between a feature selection technique and a feature selection algorithm?",
+        "answer": "A feature selection technique is a way of selecting a subset of the features, while a feature selection algorithm is a procedure for selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "77c23406-4821-42d0-9a7f-0eb74ce94984": {
+        "question": "What is the difference between a feature selection strategy and a feature selection method?",
+        "answer": "A feature selection strategy is a high-level approach for selecting a subset of the features, while a feature selection method is a specific procedure for selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "8d036538-f367-4422-82bb-52cbf3abf28d": {
+        "question": "What is the difference between a feature selection model and a feature selection algorithm?",
+        "answer": "A feature selection model is a mathematical representation of the feature selection problem, while a feature selection algorithm is a procedure for selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "59af9f35-88b6-49a7-a418-99787385b82c": {
+        "question": "What is the difference between a feature selection method and a feature selection heuristic?",
+        "answer": "A feature selection method is a systematic procedure for selecting a subset of the features, while a feature selection heuristic is a rule of thumb for selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "42da2f8b-d786-46d8-8358-03fa1f0ddef3": {
+        "question": "What is the difference between a feature selection technique and a feature selection heuristic?",
+        "answer": "A feature selection technique is a way of selecting a subset of the features, while a feature selection heuristic is a rule of thumb for selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "3a83bf04-e2fd-47f8-b62e-4b1902069fee": {
+        "question": "What is the difference between a feature selection strategy and a feature selection methodology?",
+        "answer": "A feature selection strategy is a high-level approach for selecting a subset of the features, while a feature selection methodology is a systematic approach for selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "0a405a5f-a689-4b4d-8cfa-2769d4892274": {
+        "question": "What is the difference between a feature selection method and a feature selection approach?",
+        "answer": "A feature selection method is a specific procedure for selecting a subset of the features, while a feature selection approach is a general way of selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "cb3a2177-6122-4e48-a4e3-b99fec78f65d": {
+        "question": "What is the difference between a feature selection algorithm and a feature selection technique?",
+        "answer": "A feature selection algorithm is a procedure for selecting a subset of the features, while a feature selection technique is a way of selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "75258c85-9da3-4530-a64a-e0002be799bf": {
+        "question": "What is the difference between a feature selection method and a feature selection criterion?",
+        "answer": "A feature selection method is a procedure for selecting a subset of the features, while a feature selection criterion is a measure for evaluating the quality of the selected subset.",
+        "difficulty": "Very Hard"
+    },
+    "dcde06b5-ccef-4ee2-ab78-4ceb3be05dea": {
+        "question": "What is the difference between a feature selection technique and a feature selection methodology?",
+        "answer": "A feature selection technique is a way of selecting a subset of the features, while a feature selection methodology is a systematic approach for selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "cfbcf739-572e-4395-8756-35a53113098a": {
+        "question": "What is the difference between a feature selection strategy and a feature selection technique?",
+        "answer": "A feature selection strategy is a high-level approach for selecting a subset of the features, while a feature selection technique is a way of selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "14dc4b8d-dbb8-4a7c-a99a-30c57f649f83": {
+        "question": "What is the difference between a feature selection model and a feature selection methodology?",
+        "answer": "A feature selection model is a mathematical representation of the feature selection problem, while a feature selection methodology is a systematic approach for selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "a41119b7-d898-4240-8f3f-0f18c5757bd5": {
+        "question": "What is the difference between a feature selection method and a feature selection strategy?",
+        "answer": "A feature selection method is a specific procedure for selecting a subset of the features, while a feature selection strategy is a high-level approach for selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "97f0208e-9953-41ce-802a-6ebd472e2994": {
+        "question": "What is the difference between a feature selection algorithm and a feature selection technique?",
+        "answer": "A feature selection algorithm is a procedure for selecting a subset of the features, while a feature selection technique is a way of selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "8b5784af-1a61-4175-b51d-88d7265d445f": {
+        "question": "What is the difference between a feature selection method and a feature selection heuristic?",
+        "answer": "A feature selection method is a systematic procedure for selecting a subset of the features, while a feature selection heuristic is a rule of thumb for selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "fd086264-e8c2-4f6c-8aab-7b6f428a90c4": {
+        "question": "What is the difference between a feature selection technique and a feature selection methodology?",
+        "answer": "A feature selection technique is a way of selecting a subset of the features, while a feature selection methodology is a systematic approach for selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "98768a43-7e2c-4aab-93cc-f626e17758aa": {
+        "question": "What is the difference between a feature selection strategy and a feature selection approach?",
+        "answer": "A feature selection strategy is a high-level approach for selecting a subset of the features, while a feature selection approach is a general way of selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "089e0bee-d7d7-4ec6-ae40-db004ddb9e2c": {
+        "question": "What is the difference between a feature selection method and a feature selection criterion?",
+        "answer": "A feature selection method is a specific procedure for selecting a subset of the features, while a feature selection criterion is a measure for evaluating the quality of the selected subset.",
+        "difficulty": "Very Hard"
+    },
+    "89bc00ae-1a82-4b47-8fc2-c594a76f13fd": {
+        "question": "What is the difference between a feature selection technique and a feature selection heuristic?",
+        "answer": "A feature selection technique is a way of selecting a subset of the features, while a feature selection heuristic is a rule of thumb for selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    },
+    "c8a19b5e-7b66-4188-a162-3fa3e03f0320": {
+        "question": "What is the difference between a feature selection strategy and a feature selection method?",
+        "answer": "A feature selection strategy is a high-level approach for selecting a subset of the features, while a feature selection method is a specific procedure for selecting a subset of the features.",
+        "difficulty": "Very Hard"
+    }
+}

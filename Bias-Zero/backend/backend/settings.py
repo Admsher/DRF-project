@@ -41,8 +41,11 @@ INSTALLED_APPS = [
     'home',
     'credential',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
 ]
+
+AUTH_USER_MODEL = 'credential.CustomUser'
 
 MIDDLEWARE = [
     
@@ -153,3 +156,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'jitsi5043@gmail.com'
 EMAIL_HOST_PASSWORD = 'drke pycn wold bckc'
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]

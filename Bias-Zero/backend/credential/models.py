@@ -10,22 +10,14 @@ class CustomUserManager(BaseUserManager):
         if not mobile:
             raise ValueError('Users must have a mobile number')
 
-        user = self.model(
-            email=self.normalize_email(email),
-            username=username,
-            mobile=mobile,
-        )
+        email = self.normalize_email(email)
+        user = self.model(email=email, username=username, mobile=mobile)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
     def create_superuser(self, email, username, mobile, password=None):
-        user = self.create_user(
-            email,
-            username=username,
-            mobile=mobile,
-            password=password,
-        )
+        user = self.create_user(email, username=username, mobile=mobile, password=password)
         user.is_admin = True
         user.is_staff = True
         user.is_superuser = True
@@ -63,7 +55,7 @@ class CustomUser(AbstractUser):
 
     groups = models.ManyToManyField(
         Group,
-        related_name='customuser_groups',  # Add this related_name to avoid the clash
+        related_name='customuser_groups',
         blank=True,
         verbose_name='groups',
         help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
@@ -72,12 +64,16 @@ class CustomUser(AbstractUser):
 
     user_permissions = models.ManyToManyField(
         Permission,
-        related_name='custom_users',  # Add this related_name to avoid the clash
+        related_name='custom_users',
         blank=True,
         verbose_name='user permissions',
         help_text='Specific permissions for this user.',
         related_query_name='user',
     )
+
+    class Meta:
+        verbose_name = 'user'
+        verbose_name_plural = 'users'
 
 class RelatedModel(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

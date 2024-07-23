@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState,useEffect} from "react";
 import axios from "axios";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 // import { setProfile, setImgSrc } from "../../../../store/profileSlice";
 import "react-phone-number-input/style.css";
 import PhoneInput from "react-phone-number-input";
-
-export default function EditProfile({ setEditProfile }) {
+import { toast } from "react-hot-toast";
+import Modal from "../../../../components/Modal";
+import { closeModal } from "../../../../store/modalSlice";
+export default function EditProfile() {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     username: "",
@@ -24,26 +24,52 @@ export default function EditProfile({ setEditProfile }) {
 
   // Fetch user data on component mount
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get("http://127.0.0.1:8000/auth/user/1/");
-        setFormData({
-          username: response.data.username || "",
-          company: response.data.company || "",
-          contactNumber: response.data.contact_number || "",
-          position: response.data.position || "",
-          companyDetails: response.data.company_details || "",
-          companyDescription: response.data.company_description || "",
-          password: "", // Do not set password from the backend
-        });
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        alert("Error fetching user data.");
-      }
-    };
+  const fetchUserData = async () => {
 
-    fetchUserData();
-  }, []);
+
+  // const profile = useSelector((state) => state.profile);
+
+  
+
+
+    try {
+      const token = localStorage.getItem('token'); // Replace with your actual token retrieval method
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      const response = await axios.get("http://127.0.0.1:8000/auth/get-user-by-token/", {
+        headers: {
+          Authorization: `Token ${token}`
+        }
+      });
+      console.log(token);
+      const userId = response.data.id;
+      console.log(response.data.id);
+      // Fetch the user's detailed data
+      const userResponse = await axios.get(`http://127.0.0.1:8000/auth/user/${userId}/`, {
+        headers: {
+          // Authorization: `Token ${token}`
+        }
+      });
+
+      setFormData({
+        username: userResponse.data.username || "",
+        company: userResponse.data.company || "",
+        contactNumber: userResponse.data.contact_number || "",
+        position: userResponse.data.position || "",
+        companyDetails: userResponse.data.company_details || "",
+        companyDescription: userResponse.data.company_description || "",
+        password: "", // Do not set password from the backend
+      });
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      alert("Error fetching user data.");
+    }
+  };
+
+  fetchUserData();
+}, []);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -106,26 +132,23 @@ export default function EditProfile({ setEditProfile }) {
         }
       }
 
-      setEditProfile(false);
+
     } catch (error) {
       console.error("Error updating profile:", error);
       alert("Error updating profile.");
     }
+
+
   };
+   
+   const handleCloseModal = (id) => {
+    dispatch(closeModal({ id }));
+  };
+  
 
   return (
     <div className="fixed inset-0 z-50 px-5 w-dvw grid place-items-center">
-      <div className="relative rounded-2xl border-2 border-solid max-h-full w-full md:w-[760px] border-black bg-[#487CE2] py-4 px-8">
-        <button
-          type="button"
-          className="cursor-pointer absolute top-3 right-4"
-          onClick={() => setEditProfile(false)}
-        >
-          <FontAwesomeIcon
-            className="block m-0 p-0 text-white text-3xl"
-            icon={faXmark}
-          />
-        </button>
+      <Modal onClose={() => handleCloseModal(3)}>
         <div className="flex flex-col justify-center">
           <h2 className="underline text-3xl mb-6 text-center text-white">
             Profile
@@ -230,7 +253,7 @@ export default function EditProfile({ setEditProfile }) {
                   placeholder="Company name"
                   className="block rounded-3xl bg-white px-4 py-2 w-full md:max-w-[460px] max-w-full"
                 />
-                <label htmlFor="position" className="text-white">
+                <label htmlFor="companyPosition" className="text-white">
                   Company position*
                 </label>
                 <input
@@ -274,7 +297,7 @@ export default function EditProfile({ setEditProfile }) {
             </div>
           </form>
         </div>
-      </div>
+      </Modal>
     </div>
   );
 }

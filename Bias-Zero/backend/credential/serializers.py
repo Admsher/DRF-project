@@ -44,6 +44,7 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()
 
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -52,8 +53,14 @@ class LoginSerializer(serializers.Serializer):
         email = data.get('email')
         password = data.get('password')
 
-        # Authenticate using email as username
-        user = authenticate(request=self.context.get('request'), username=email, password=password)
+        if not email or not password:
+            raise serializers.ValidationError("Email and password are required.")
+
+        print(f"Attempting to authenticate user with email: {email}")
+        user = authenticate(username=email, password=password)
+        print(f"Authentication result for user with email {email}: {user}")
+
         if user and user.is_active:
             return user
-        raise serializers.ValidationError("Incorrect Credentials")
+
+        raise serializers.ValidationError("Incorrect credentials.")

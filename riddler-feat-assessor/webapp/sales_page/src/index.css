@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+}
+body {
+  font-family: "Inter", sans-serif;
+}
+.wrapper {
+  max-width: 1330px;
+  padding: 0 20px;
+  margin: 0 auto;
+}
+.wrapper-l {
+  max-width: 1430px;
+  padding: 0 20px;
+  margin: 0 auto;
+}

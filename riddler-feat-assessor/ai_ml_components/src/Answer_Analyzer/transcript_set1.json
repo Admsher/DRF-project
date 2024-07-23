@@ -1,0 +1,17 @@
+{
+    "6369f653-573f-47c5-8e80-0845eedc111f": "Parametric models have fixed parameters estimated from data, while non-parametric models adapt with data size and type.",
+    "4bcff51f-b91b-40e9-8bec-56c85982c4d7": "Precision measures correct positive predictions, while recall measures correctly predicted actual positives.",
+    "28878e60-3fb8-4252-ae1f-7d7a467a584d": "Generative models estimate joint distributions; discriminative, conditional. Latter predict labels; former understand causes.",
+    "9feb1816-fa41-4549-bcdc-b3bd020e973c": "Bias-variance tradeoff balances model simplification with error sensitivity; choosing complexity minimizes total error.",
+    "0b57c931-90bc-457c-a5ee-8f53a74b346e": "Machine learning uses data and algorithms; deep learning is neural networks' complex subfield.",
+    "77c791bc-dce6-44c1-b86a-333fa292214f": "Neural networks' human brain-inspired algorithms excel in tasks like image and speech recognition.",
+    "5088e54d-eb18-409d-9de0-ff4d603e3b35": "Kernel functions compute scalar values without mapping high-dimensional data, crucial for SVMs and kernel density.",
+    "b7b0578e-0357-4a3d-bd8a-0a7f6d536f69": "SVMs find optimal hyperplane for data classes, while neural networks use interconnected nodes for tasks beyond classification.",
+    "e7edf682-870b-4ab9-aa77-9bae42100c93": "Meta-learning improves task adaptation and model efficiency; vital in few-shot learning and domain adaptation.",
+    "5ad7223b-1b25-4c4d-8802-66ee0db19956": "Cross-validation tests models with k-folds; refines hyperparameters and ensures accurate performance estimates.",
+    "8704969f-5e91-4e5d-a6a2-3ed071d24a69": "Bayesian tests model-generated data hypotheses; frequentist tests random data population hypotheses using p-values.",
+    "66efaeb4-02c6-4d02-a68d-083d44d5d574": "Challenges include AI impact on jobs, bias and discrimination, privacy, accountability, and technological singularity.",
+    "94afdae1-f8ba-421c-a07e-3e024b4f15ad": "Model evaluation uses accuracy, precision, recall, and F1 score; tests on new data crucial for real-world application.",
+    "e288d677-8715-495c-83dd-e876a052c4c1": "Diverse, representative data and regular audits mitigate bias and discrimination in ML models.",
+    "41bae8d2-d373-4702-9ece-587b8c031a62": "ML imitates human learning using data and algorithms; improving accuracy progressively."
+}
