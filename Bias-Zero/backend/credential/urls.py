@@ -14,4 +14,5 @@ router.register(r'profile-picture', UploadProfilePictureViewSet, basename='profi
 urlpatterns = [
     path('', include(router.urls)),
     path('get-user-by-token/', get_user_by_token, name='get_user_by_token'),
+   
 ]

@@ -14,9 +14,12 @@ from .models import CustomUser
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate ,login
 from rest_framework.viewsets import ViewSet
-
+from rest_framework.authentication import TokenAuthentication
+from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist
+import json
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 
 
@@ -25,7 +28,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
-
+    
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         try:
@@ -38,8 +41,10 @@ class UserViewSet(viewsets.ModelViewSet):
         instance.delete()
 
     def update(self, request, *args, **kwargs):
+        
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)  # Use partial=True to allow partial updates
+        
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
@@ -51,6 +56,9 @@ class UserViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+    
+    
+
     
     
 @api_view(['GET'])
@@ -79,46 +87,95 @@ class LoginViewSet(ViewSet):
                 request.data = json.loads(request.data)
             except json.JSONDecodeError:
                 return Response({"error": "Invalid JSON format"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        serializer = self.serializer_class(data=request.data)
 
-        # for key, values in serializer.errors.items():
-        #     error = [value[:] for value in values]
-        #     print(error)
+        serializer = self.serializer_class(data=request.data)
+        
         if serializer.is_valid():
-            print("valid")
-            user = serializer.validated_data
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key}, status=status.HTTP_200_OK)
+            # Extract the username and password from validated data
+            username = serializer.validated_data.get('username')
+            password = serializer.validated_data.get('password')
+
+            # Authenticate the user
+            user = authenticate(username=username, password=password)
+            
+            if user is not None:
+                # Log in the user (sets the session)
+                login(request, user)
+
+                # Get or create a token for the user
+                token, created = Token.objects.get_or_create(user=user)
+                print(token)
+                return Response({'token': token.key}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
+
 class VerifyPasswordViewSet(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def create(self, request):
+        email=request.data.get('email')
         password = request.data.get('password')
+        print(password)
         if not password:
             return Response({'error': 'Password is required.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        user = authenticate(request=request, password=password)
+        user = authenticate(email=email,password=password)
+        print("authenticated")
         if user and user.is_authenticated:
+            
             return Response({'status': 'Password verified'}, status=status.HTTP_200_OK)
         return Response({'error': 'Incorrect password.'}, status=status.HTTP_400_BAD_REQUEST)
     
 
-class UpdateProfileViewSet(viewsets.ModelViewSet):
+
+
+class UpdateProfileViewSet(viewsets.ViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        return CustomUser.objects.filter(id=self.request.user.id)
-
     def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
+        # Get the currently authenticated user
+        user = request.user
 
+        if not user:
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Use the serializer to update the user
+        serializer = self.serializer_class(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# @api_view(["PUT"])
+# @csrf_exempt
+# @permission_classes([IsAuthenticated])
+# def update_profile(request):
+#     user = request.user
+#     payload = json.loads(request.body)
+    
+#     try:
+#         if not user:
+#             return JsonResponse({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+#         # Use the serializer to update the user
+#         serializer = UserSerializer(user, data=payload, partial=True)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return JsonResponse({'user': serializer.data}, safe=False, status=status.HTTP_200_OK)
+#         return JsonResponse({'errors': serializer.errors}, safe=False, status=status.HTTP_400_BAD_REQUEST)
+
+#     except ObjectDoesNotExist as e:
+#         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_404_NOT_FOUND)
+#     except Exception as e:
+#         return JsonResponse({'error': f'Something terrible went wrong: {str(e)}'}, safe=False, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class UploadProfilePictureViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
@@ -126,6 +183,7 @@ class UploadProfilePictureViewSet(viewsets.ViewSet):
     def update(self, request, *args, **kwargs):
         user = request.user
         profile_picture = request.FILES.get('profile_picture')
+        
         if not profile_picture:
             return Response({'error': 'No file provided.'}, status=status.HTTP_400_BAD_REQUEST)
 

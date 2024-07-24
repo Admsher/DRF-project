@@ -18,6 +18,7 @@ export default function EditProfile() {
     companyDescription: "",
     password: "",
   });
+  const[currentEmail,setCurrentEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -43,7 +44,7 @@ export default function EditProfile() {
           Authorization: `Token ${token}`
         }
       });
-      console.log(token);
+      // console.log(token);
       const userId = response.data.id;
       console.log(response.data.id);
       // Fetch the user's detailed data
@@ -88,25 +89,54 @@ export default function EditProfile() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    const token = localStorage.getItem('token');
+    const response = await axios.get("http://127.0.0.1:8000/auth/get-user-by-token/", {
+        headers: {
+          Authorization: `Token ${token}`
+        }
+      });
+      // console.log(token);
+      const userId = response.data.id;
+      console.log(response.data.id);
+   
+
     try {
+      
+      
       // Verify the current password
       const passwordCheckResponse = await axios.post("http://127.0.0.1:8000/auth/verify-password/", {
+        // id:userId,
+        email: currentEmail,
         password: currentPassword,
-      });
+      })
+      ;
       if (passwordCheckResponse.status !== 200) {
         alert("Incorrect current password.");
         return;
       }
-
+      
+     
+      console.log(formData);
       // Update profile information
-      const profileResponse = await axios.put("http://127.0.0.1:8000/auth/profile/", {
-        username: formData.username,
-        company: formData.company,
-        contact_number: formData.contactNumber,
-        position: formData.position,
-        company_details: formData.companyDetails,
-        company_description: formData.companyDescription,
-      });
+       const profileResponse = await axios.put(
+            `http://127.0.0.1:8000/auth/profile/${userId}/`, 
+            {
+                username: formData.username,
+                company: formData.company,
+                email: currentEmail,
+                contact_number: formData.contactNumber,
+                position: formData.position,
+                company_details: formData.companyDetails,
+                company_description: formData.companyDescription,
+            }, 
+            {
+                headers: {
+                    'Authorization': `Token ${token}`,  // Include token in headers
+                },
+            }
+        );
+      
+      
       if (profileResponse.status === 200) {
         // dispatch(setProfile(formData));
         alert("Profile updated successfully!");
@@ -197,8 +227,8 @@ export default function EditProfile() {
                   <input
                     type="email"
                     id="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
+                    value={currentEmail}
+                     onChange={(e) => setCurrentEmail(e.target.value)}
                     placeholder="E-mail address"
                     className="block rounded-3xl px-4 py-2 bg-white max-w-full md:max-w-[365px] w-full"
                   />
