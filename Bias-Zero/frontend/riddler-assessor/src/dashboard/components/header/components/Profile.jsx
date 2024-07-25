@@ -4,6 +4,48 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { openModal } from "../../../../store/modalSlice";
 const Profile = () => {
+
+  useEffect(() => {
+  const fetchUserData = async () => {
+
+
+  // const profile = useSelector((state) => state.profile);
+
+  
+
+
+    try {
+      const token = localStorage.getItem('token'); // Replace with your actual token retrieval method
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      const response = await axios.get("http://127.0.0.1:8000/auth/get-user-by-token/", {
+        headers: {
+          Authorization: `Token ${token}`
+        }
+      });
+      // console.log(token);
+      const userId = response.data.id;
+      console.log(response.data.id);
+      // Fetch the user's detailed data
+      const userResponse = await axios.get(`http://127.0.0.1:8000/auth/user/${userId}/`, {
+        headers: {
+          // Authorization: `Token ${token}`
+        }
+      });
+
+      console.log(userResponse);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      alert("Error fetching user data.");
+    }
+  };
+
+  fetchUserData();
+}, []);
+
+
   const profile = useSelector((state) => state.profile);
   const modal = useSelector((state) => state.modal.isOpen);
   const dispatch = useDispatch();
