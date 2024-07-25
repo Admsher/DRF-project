@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { setProfile } from "../../store/profileSlice";
 import Logo from "../components/logo";
 import Cardlayout from "../components/cardlayout";
 import Heading from "../components/heading";
@@ -9,57 +7,58 @@ import Button from "../components/button";
 import eyeopen from "../components/eyeopen.png";
 import eyeclose from "../components/eyeclose.png";
 import toast from "react-hot-toast";
-import axios from 'axios';
+import axios from "axios";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [username, setUserName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  function handleUser(e) {
-    setUserName(e.target.value);
-  }
+  const handleEmail = (e) => {
+    setEmail(e.target.value);
+  };
 
-  function handlePassword(e) {
+  const handlePassword = (e) => {
     setPassword(e.target.value);
-  }
+  };
 
-  function handleVisibility(e) {
+  const handleVisibility = () => {
     setVisible(!visible);
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        'http://127.0.0.1:8000/auth/login/',
+        "http://127.0.0.1:8000/auth/login/",
         {
-          email: username,
-          password: password
+          email: email,
+          password: password,
         },
         {
           headers: {
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
 
-      // Assuming the token is returned in response.data.token
       const { token } = response.data;
 
-      // Store the token in local storage
-      localStorage.setItem('token', token);
+      localStorage.setItem("token", token);
 
-      // Redirect to home or another page
-      navigate('/home');
+      toast.success("Login successful!");
+      navigate("/home");
     } catch (error) {
-      console.error("Login error:", error);
-      setError("Invalid credentials. Try Again!!!");
+      if (error.response && error.response.status === 400) {
+        setError("Invalid credentials. Try Again!!!");
+      } else {
+        setError("An error occurred. Please try again later.");
+      }
+      toast.error("Login failed!");
     }
   };
-
 
   return (
     <div className="h-screen w-screen bg-dkblue overflow-hidden">
@@ -70,11 +69,11 @@ const Login = () => {
           <div className="flex flex-col p-5 pt-2 pb-0 items-center justify-center space-y-5 text-black">
             <input
               minLength={4}
-              type="text"
-              placeholder="Enter username"
+              type="email"
+              placeholder="Enter email"
               className="w-11/12 p-3 rounded-2xl focus:outline-none bg-otpinpbg font-normal"
-              value={username}
-              onChange={handleUser}
+              value={email}
+              onChange={handleEmail}
               required
             />
             <div className="w-full flex items-center justify-center">
@@ -93,9 +92,9 @@ const Login = () => {
                 type="button"
               >
                 {visible ? (
-                  <img src={eyeopen} alt="@" className="h-8" />
+                  <img src={eyeopen} alt="Show password" className="h-8" />
                 ) : (
-                  <img src={eyeclose} alt="@" className="h-8" />
+                  <img src={eyeclose} alt="Hide password" className="h-8" />
                 )}
               </button>
             </div>

@@ -2,13 +2,19 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate
 from .models import CustomUser
 
+
+
 class UserSerializer(serializers.ModelSerializer):
     # Define password field as write-only
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'mobile', 'contact_number', 'company', 'position', 'company_details', 'company_description', 'profile_picture', 'password']
+        fields = [
+            'id', 'username', 'email', 'mobile', 'contact_number', 
+            'company', 'position', 'company_details', 'company_description', 
+            'profile_picture', 'password'
+        ]
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -43,6 +49,7 @@ class UserSerializer(serializers.ModelSerializer):
         if password:
             instance.set_password(password)
         instance.save()
+        return instance
 
 
 class LoginSerializer(serializers.Serializer):

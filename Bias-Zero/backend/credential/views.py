@@ -74,29 +74,23 @@ def get_user_by_token(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-
 class LoginViewSet(ViewSet):
     permission_classes = [AllowAny]
     serializer_class = LoginSerializer
 
     def create(self, request):
-        # Ensure request.data is a dictionary
-        if isinstance(request.data, str):
-            import json
-            try:
-                request.data = json.loads(request.data)
-            except json.JSONDecodeError:
-                return Response({"error": "Invalid JSON format"}, status=status.HTTP_400_BAD_REQUEST)
-
         serializer = self.serializer_class(data=request.data)
+        print(serializer.is_valid())
         
         if serializer.is_valid():
-            # Extract the username and password from validated data
-            username = serializer.validated_data.get('username')
-            password = serializer.validated_data.get('password')
+            print()
+            # Extract the email and password from validated data
+            
+            email =request.data.get('email')
+            password = request.data.get('password')
 
             # Authenticate the user
-            user = authenticate(username=username, password=password)
+            user = authenticate(email=email, password=password)
             
             if user is not None:
                 # Log in the user (sets the session)
@@ -104,7 +98,6 @@ class LoginViewSet(ViewSet):
 
                 # Get or create a token for the user
                 token, created = Token.objects.get_or_create(user=user)
-                print(token)
                 return Response({'token': token.key}, status=status.HTTP_200_OK)
             else:
                 return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
