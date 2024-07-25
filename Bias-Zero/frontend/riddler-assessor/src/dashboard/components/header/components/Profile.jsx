@@ -1,8 +1,10 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector ,} from "react-redux";
 import EditProfile from "./EditProfile";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { openModal } from "../../../../store/modalSlice";
+import { useState,useEffect} from "react";
+import axios from "axios";
 const Profile = () => {
 
   useEffect(() => {
