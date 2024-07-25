@@ -5,14 +5,16 @@ import Logo from "../components/logo";
 import Circles from "../components/circles";
 import Heading from "../components/heading";
 import Button from "../components/button";
+import axios from "axios";
+import Cookies from 'js-cookie';
 
 function Otpcheck() {
   const navigate = useNavigate();
   const [otp, setOtp] = useState(new Array(6).fill(""));
-  const [check, setCheck] = useState("");
-  const [OTP, setOTP] = useState("");
+  const [OTP, setOTP] = useState(""); // This should be managed by the server in a real-world app
   const inputRefs = useRef([]);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     generateOtp();
@@ -22,8 +24,9 @@ function Otpcheck() {
   }, []);
 
   function generateOtp() {
-    const randomotp = Math.floor(100000 + Math.random() * 90000);
-    setOTP(randomotp);
+    // This is a placeholder; ideally, the OTP should be fetched from the server
+    const randomotp = Math.floor(100000 + Math.random() * 900000);
+    setOTP(randomotp.toString());
     console.log("OTP: " + randomotp);
   }
 
@@ -32,44 +35,20 @@ function Otpcheck() {
     if (isNaN(value)) return;
 
     const newOtp = [...otp];
-    //allow only input in each box by keeping only last element from string
     newOtp[index] = value.substring(value.length - 1);
     setOtp(newOtp);
-    /* 
-           Here we use newOtp to get the combined top bcz
-           The setOtp is Asynchronous function it will not be updated 
-           until function is exited
-           so we use newOtp to get combinedOtp
-        */
     const combinedOtp = newOtp.join("");
-    //submit trigger
-    /* if(combinedOtp.length===6)
-            onOtpSubmit(combinedOtp) */
 
-    //Move to next input current input is filled
     if (value && index < 5 && inputRefs.current[index + 1]) {
       inputRefs.current[index + 1].focus();
     }
-    //Move back if input field is empty and we have another method
-    //handelKeyDown clears previous value when current field is empty
-    //and the following will move focus to previous when current field is empty
-    //handelKeyDown confused wheter to keep handelKeyDown or not but combining both is overcoming eachothers cons
-    /*  if(!value && index>0 && inputRefs.current[index-1])
-        {
-            inputRefs.current[index-1].focus();
-        } */
   };
 
-  /* const onOtpSubmit=(combinedOtp)=>{
-        console.log(combinedOtp)
-    } */
-  const handelClick = (index) => {
-    //Make sure the blinker stays right of the text
-    //when entered new text at left it doesnt update unless blinker is at right
+  const handleClick = (index) => {
     inputRefs.current[index].setSelectionRange(1, 1);
   };
 
-  const handelKeyDown = (index, e) => {
+  const handleKeyDown = (index, e) => {
     if (
       e.key === "Backspace" &&
       !otp[index] &&
@@ -88,61 +67,92 @@ function Otpcheck() {
         ref={(input) => (inputRefs.current[index] = input)}
         value={value}
         onChange={(e) => handleChange(index, e)}
-        onClick={() => handelClick(index)}
-        onKeyDown={(e) => handelKeyDown(index, e)}
-        className="text-xl text-center font-bold  h-10 w-12 my-2 flex items-center justify-center rounded-md px-4 text-white bg-[#487CE2] focus:outline-none"
+        onClick={() => handleClick(index)}
+        onKeyDown={(e) => handleKeyDown(index, e)}
+        className="text-xl text-center font-bold h-10 w-12 my-2 flex items-center justify-center rounded-md px-4 text-white bg-[#487CE2] focus:outline-none"
       />
     );
   });
 
-  function resendOtp() {
-    setOtp(new Array(6).fill(""));
-    generateOtp();
-  }
-  function handleSubmit(e) {
+  const resendOtp = async () => {
+    const userEmail = Cookies.get('userEmail');
+   
+    try {
+      setLoading(true);
+      await axios.post(
+        'http://127.0.0.1:8000/forgetpassword/otp/forgot-password/', // Your resend OTP endpoint
+        { email: userEmail }, // Provide the email if needed
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      setOtp(new Array(6).fill(""));
+      generateOtp();
+    } catch (error) {
+      setError("Failed to resend OTP. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    const email = Cookies.get('userEmail');
+    console.log(email)
     e.preventDefault();
     const c = otp.join("");
-    setCheck(c);
-    if (c === OTP) {
-      setError(!error);
-      navigate("/resetpassword");
-    } else {
-      setError(!error);
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        'http://127.0.0.1:8000/forgetpassword/otp/verify-otp/', // Your verify OTP endpoint
+        { email: email, otp: c },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      if (response.status === 200) {
+        navigate("/resetpassword");
+      }
+    } catch (error) {
+      setError("Invalid OTP or OTP has expired.");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
+
   return (
     <div className="w-screen h-screen bg-dkblue overflow-hidden">
       <Logo />
       <Cardlayout>
         <Heading>Forgot Password</Heading>
-        <div className=" ml-14 text-white font-semibold text-xs">
-          <p>Enter Otp that has been sent to your email.</p>
+        <div className="ml-14 text-white font-semibold text-xs">
+          <p>Enter the OTP that has been sent to your email.</p>
         </div>
-        {/* Otp Form */}
+        {/* OTP Form */}
         <form onSubmit={handleSubmit}>
-          {/* Otp input */}
-          <div className="m-5 mb-1 mx-14 ">
+          {/* OTP input */}
+          <div className="m-5 mb-1 mx-14">
             <div className="w-full rounded-md bg-[#E8EFFF] flex items-center justify-center space-x-2 h-14">
               {fields}
             </div>
           </div>
-
           <div className="w-full text-center">
             <button
               type="button"
               onClick={resendOtp}
               className="text-xs hover:underline cursor-pointer"
+              disabled={loading}
             >
-              Resend OTP?
+              {loading ? "Resending..." : "Resend OTP?"}
             </button>
           </div>
           <div className="h-2 w-full text-center">
             {error && (
-              <p className="font-bold">Please verify the OTP and try again</p>
+              <p className="text-red-600 font-bold">{error}</p>
             )}
           </div>
           <div className="mt-12">
-            <Button type={"submit"}>Submit</Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Submitting..." : "Submit"}
+            </Button>
           </div>
         </form>
       </Cardlayout>
@@ -152,5 +162,3 @@ function Otpcheck() {
 }
 
 export default Otpcheck;
-
-/* <input className=' text-xl font-bold  h-10 w-12 my-2 flex items-center justify-center rounded-md px-4 text-white bg-otpnnum no-spin focus:outline-none'/> */

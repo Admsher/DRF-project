@@ -5,21 +5,35 @@ import Logo from "../components/logo";
 import Button from "../components/button";
 import Circles from "../components/circles";
 import Heading from "../components/heading";
-
+import axios from "axios";
+import Cookies from 'js-cookie';
 function Forgotpassword() {
   const navigate = useNavigate();
-  const [email, Setemail] = useState("");
-  const [error, setError] = useState(false);
-  const userDataSet = JSON.parse(localStorage.getItem("userDataset"));
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false); // To handle loading state
 
-  function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const user = userDataSet.find((user) => user.email === email);
-
-    if (!user) {
+    setLoading(true); // Set loading to true when starting the request
+  
+    
+    try {
+      const response = await axios.post(
+        'http://127.0.0.1:8000/forgetpassword/otp/forgot-password/', // Your API endpoint
+        { email },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      console.log(email)
+     Cookies.set('userEmail', email, { expires: 1 });
+      // If successful, navigate to OTP check page
       navigate("/otpcheck");
-    } else setError("Email not found");
-  }
+    } catch (error) {
+      setError("Email not found or error occurred."); // Error message if the request fails
+    } finally {
+      setLoading(false); // Set loading to false after request completes
+    }
+  };
 
   return (
     <div className="w-screen h-screen bg-dkblue overflow-hidden">
@@ -28,17 +42,17 @@ function Forgotpassword() {
         <Heading>Forgot Password</Heading>
         {/* Inputs */}
         <form onSubmit={handleSubmit}>
-          <div className=" p-8 px-14 pb-2">
+          <div className="p-8 px-14 pb-2">
             <input
               type="email"
               placeholder="Enter Email"
               className="p-3 w-full text-black bg-white focus:outline-none rounded-md"
               value={email}
-              onChange={(e) => Setemail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
-          <div className=" ml-14 text-black text-xs">
+          <div className="ml-14 text-black text-xs">
             <p>
               The instructions to reset your password will be sent to your
               email.
@@ -47,8 +61,10 @@ function Forgotpassword() {
           <div className="h-2 w-full text-center p-3 pb-0">
             {error && <p className="text-red-600 font-bold">{error}</p>}
           </div>
-          <div className=" mt-11">
-            <Button type={"submit"}>Submit</Button>
+          <div className="mt-11">
+            <Button type={"submit"} disabled={loading}> {/* Disable button while loading */}
+              {loading ? "Sending..." : "Submit"}
+            </Button>
           </div>
         </form>
       </Cardlayout>
@@ -58,7 +74,3 @@ function Forgotpassword() {
 }
 
 export default Forgotpassword;
-
-/*  h-16 flex items-end justify-center font-medium text-xl text-black 
-    p-8 text-xl text-black font-medium text-center
-*/

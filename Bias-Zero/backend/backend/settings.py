@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'forgetpassword'
 ]
 
 AUTH_USER_MODEL = 'credential.CustomUser'
@@ -159,3 +160,11 @@ EMAIL_HOST_PASSWORD = 'drke pycn wold bckc'
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}

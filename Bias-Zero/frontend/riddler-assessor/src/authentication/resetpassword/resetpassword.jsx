@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Logo from "../components/logo";
 import Cardlayout from "../components/cardlayout";
 import Circles from "../components/circles";
@@ -8,11 +10,9 @@ import eyeopen from "../components/eyeopen.png";
 import eyeclose from "../components/eyeclose.png";
 import eyeopen2 from "../components/eyeopen.png";
 import eyeclose2 from "../components/eyeclose.png";
-import { useNavigate } from "react-router-dom";
 
 function Resetpassword() {
   const currentuser = JSON.parse(localStorage.getItem("currentuser"));
-  const userDataSet = JSON.parse(localStorage.getItem("userDataset"));
   const navigate = useNavigate();
   const [newpwd, setNewpwd] = useState("");
   const [confirmpwd, setConfpwd] = useState("");
@@ -23,35 +23,38 @@ function Resetpassword() {
   function handleSubmit(e) {
     e.preventDefault();
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
     if (newpwd === confirmpwd) {
       setError("");
-      console.log("Comparision--------------------------");
-      if (!/^(?=.*[A-Z])/.test(newpwd)) {
-        console.error("Should have atleast one Capital letter[A-Z]");
-        setError("[A-Z]");
-      }
-      if (!/^(?=.*\d)/.test(newpwd)) {
-        console.log("[0-9]");
-      }
-      if (newpwd.length < 8) {
-        console.log("len<8");
-      }
       if (passwordRegex.test(newpwd)) {
-        console.log("successful");
-        console.log(currentuser);
-        //update password
-        const userIndex = userDataSet.findIndex(
-          (user) => user.username === currentuser.username
-        );
-        userDataSet[userIndex].password = newpwd;
-        localStorage.setItem("userDataset", JSON.stringify(userDataSet));
-        console.log(userDataSet);
-        navigate("/");
+        // Update password on the server
+        axios.post('http://127.0.0.1:8000/forgetpassword/resetpassword/', {
+          username: currentuser.username,
+          new_password: newpwd
+        })
+        .then(response => {
+          if (response.status === 200) {
+            localStorage.setItem("userDataset", JSON.stringify(
+              JSON.parse(localStorage.getItem("userDataset")).map(user =>
+                user.username === currentuser.username
+                  ? { ...user, password: newpwd }
+                  : user
+              )
+            ));
+            navigate("/");
+          }
+        })
+        .catch(error => {
+          setError("Failed to update the password. Please try again.");
+        });
+      } else {
+        setError("Password must be at least 8 characters long, with at least one capital letter and one digit.");
       }
     } else {
       setError("The passwords do not match. Please try again.");
     }
   }
+
   function handleNewpwd(e) {
     setNewpwd(e.target.value);
   }
@@ -59,10 +62,14 @@ function Resetpassword() {
   function handleConfirmpwd(e) {
     setConfpwd(e.target.value);
   }
+
   function handleVisibility1(e) {
+    e.preventDefault();
     setVisible1(!visible1);
   }
+
   function handleVisibility2(e) {
+    e.preventDefault();
     setVisible2(!visible2);
   }
 
@@ -72,30 +79,30 @@ function Resetpassword() {
       <Cardlayout>
         <Heading>Reset Password</Heading>
         <form onSubmit={handleSubmit}>
-          <div className="flex flex-col p-5 pt-2 items-center justify-center space-y-5 text-black ">
-            <div className="w-full flex items-center justify-center">
+          <div className="flex flex-col p-5 pt-2 items-center justify-center space-y-5 text-black">
+            <div className="relative w-full flex items-center justify-center">
               <input
                 type={visible1 ? "text" : "password"}
                 placeholder="Enter new password"
-                className=" w-11/12 p-3 rounded-2xl focus:outline-none bg-otpinpbg font-normal"
+                className="w-11/12 p-3 rounded-2xl focus:outline-none bg-otpinpbg font-normal"
                 value={newpwd}
                 onChange={handleNewpwd}
                 required
               />
               <button
-                className="absolute right-14 p-1 rounded-full text-white cursor-pointer "
+                className="absolute right-14 p-1 rounded-full text-white cursor-pointer"
                 onClick={handleVisibility1}
                 type="button"
               >
                 {visible1 ? (
-                  <img src={eyeopen} alt="@" className="h-8" />
+                  <img src={eyeopen} alt="Show password" className="h-8" />
                 ) : (
-                  <img src={eyeclose} alt="@" className="h-8" />
+                  <img src={eyeclose} alt="Hide password" className="h-8" />
                 )}
               </button>
             </div>
 
-            <div className="w-full flex items-center justify-center">
+            <div className="relative w-full flex items-center justify-center">
               <input
                 type={visible2 ? "text" : "password"}
                 placeholder="Confirm password"
@@ -105,14 +112,14 @@ function Resetpassword() {
                 required
               />
               <button
-                className="absolute right-14 p-1 rounded-full text-white cursor-pointer "
+                className="absolute right-14 p-1 rounded-full text-white cursor-pointer"
                 onClick={handleVisibility2}
                 type="button"
               >
                 {visible2 ? (
-                  <img src={eyeopen2} alt="@" className="h-8" />
+                  <img src={eyeopen2} alt="Show password" className="h-8" />
                 ) : (
-                  <img src={eyeclose2} alt="@" className="h-8" />
+                  <img src={eyeclose2} alt="Hide password" className="h-8" />
                 )}
               </button>
             </div>
@@ -121,7 +128,7 @@ function Resetpassword() {
             {error && <p className="text-red-600 font-bold">{error}</p>}
           </div>
           <div>
-            <Button>Submit</Button>
+            <Button type="submit">Submit</Button>
           </div>
         </form>
       </Cardlayout>
